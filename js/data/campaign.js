@@ -26,7 +26,7 @@ export const CAMPAIGN = [
   },
   {
     id: 'c3', name: 'Страж рудников', icon: '⛏️', class: 'vincent',
-    difficulty: 'normal',
+    difficulty: 'normal', deckMod: 'weak',
     intro: 'Народ Земли не пускает чужаков к жилам Звёздной Крови.',
     rewardGold: 150,
     unlocks: ['tolya_grohot', 'siege_kido'],
@@ -48,8 +48,8 @@ export const CAMPAIGN = [
   },
   {
     id: 'c6', name: 'Ледяная Заводь', icon: '🧊', class: 'azimandia',
-    difficulty: 'normal', boss: { openingBoard: ['iceShard', 'iceShard'] },
-    intro: 'БОСС. Хозяйка заводи начинает бой с ледяными осколками на столе.',
+    difficulty: 'normal', boss: { openingBoard: ['iceShard'] },
+    intro: 'БОСС. Хозяйка заводи начинает бой с ледяным осколком на столе.',
     rewardGold: 250,
     unlocks: ['star_ice', 'timeless_echo', 'lendo'],
   },
@@ -79,11 +79,11 @@ export const CAMPAIGN = [
   },
   {
     id: 'c10', name: 'Азимандия Безвременья', icon: '⏳', class: 'azimandia',
-    difficulty: 'hard', boss: { extraHealth: 10, startArmor: 5, doubleHeroPower: true },
-    intro: 'ФИНАЛ. Отражение Азимандии из другой ветви времени: 40 здоровья, 5 брони, двойной Аспект.',
+    difficulty: 'hard', boss: { extraHealth: 5, doubleHeroPower: true },
+    intro: 'ФИНАЛ. Отражение Азимандии из другой ветви времени: 35 здоровья и двойной Аспект.',
     rewardGold: 500,
     unlocks: ['time_loop', 'red_wave', 'herald_ascension'],
-    addCards: ['red_wave', 'star_comet', 'timeless_echo'],
+    addCards: ['red_wave', 'timeless_echo'],
   },
 ];
 
@@ -94,7 +94,10 @@ export function encounterDeck(enc) {
   if (enc.deckMod === 'weak') {
     const cheap = ['pup_karkh', 'tauro_bull', 'burrower', 'steel_sentinel', 'gremlin_digger'];
     const expensive = ['drill_walker', 'deep_horror', 'thunder_tauro', 'plains_matriarch',
-      'rune_keeper', 'ascension_banner', 'night_carver', 'elimination', 'word_of_void'];
+      'rune_keeper', 'ascension_banner', 'night_carver', 'elimination', 'word_of_void',
+      // Кусачие карты ранних боёв: без них новичку проще выжить.
+      'pack_order', 'spear_hail', 'karkh_rider', 'poison_vial', 'hidden_lunge',
+      'igg_vanguard', 'justice_hammer'];
     let swapIdx = 0;
     base = base.map((id) => expensive.includes(id) ? cheap[(swapIdx++) % cheap.length] : id);
   }
