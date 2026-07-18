@@ -208,6 +208,16 @@ def main():
         back.save(os.path.join(out_dir, 'card_back.webp'), 'WEBP', quality=82)
         print('✅ extras: фон стола + рубашка карты')
 
+    # menu_bg.png: широкий фон главного меню.
+    mbg = find_sheet(raw_dir, 'menu_bg')
+    if mbg:
+        img = Image.open(mbg).convert('RGB')
+        w, h = img.size
+        scale = 1600 / w
+        img = img.resize((1600, int(h * scale)), Image.LANCZOS)
+        img.save(os.path.join(out_dir, 'menu_bg.webp'), 'WEBP', quality=78)
+        print('✅ menu_bg: фон главного меню')
+
     # Переиспользование артов.
     for target, source in REUSE.items():
         if not source:

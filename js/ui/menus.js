@@ -10,44 +10,102 @@ import * as Save from '../state/save.js';
 import { Audio } from '../audio/audio.js';
 import { ART } from '../data/art-manifest.js';
 import { confirmDialog, alertDialog } from './dialog.js';
+import { svgIcon } from './icons.js';
 
 export function renderMenu(root, nav) {
   root.replaceChildren();
   Audio.setScene('menu');
   const s = Save.load();
-  const wrap = el('div', 'menu-screen');
+  const wrap = el('div', 'menu-hero');
+  if (ART.has('menu_bg')) wrap.style.setProperty('--menu-bg', 'url("assets/art/menu_bg.webp")');
+
+  // Дрейфующие звёзды на фоне.
+  const stars = el('div', 'menu-stars');
+  for (let i = 0; i < 14; i++) {
+    const st = el('span', 'menu-star');
+    st.style.cssText = `left:${(i * 7.3 + 3) % 100}%;top:${(i * 13.7 + 5) % 100}%;` +
+      `animation-delay:${(i * 0.9) % 6}s;animation-duration:${6 + (i % 5)}s;`;
+    stars.append(st);
+  }
+  wrap.append(stars);
+
+  // ---- Левая колонна: тайтл, статы, режимы ----
+  const left = el('div', 'menu-left');
+
+  const lockup = el('div', 'menu-lockup');
   const logo = el('div', 'game-logo');
   if (ART.has('logo_emblem')) {
     logo.classList.add('has-image');
     logo.style.backgroundImage = 'url("assets/art/logo_emblem.webp")';
   } else logo.textContent = '🌌';
-  wrap.append(logo);
-  wrap.append(el('h1', 'game-title', 'Звёздная Кровь'));
-  wrap.append(el('div', 'game-subtitle', 'Руны Восхождения — коллекционная карточная игра'));
+  lockup.append(logo);
+  const titleBox = el('div', 'menu-titlebox');
+  titleBox.append(el('h1', 'game-title', 'Звёздная Кровь'));
+  titleBox.append(el('div', 'game-subtitle', 'Руны Восхождения'));
+  lockup.append(titleBox);
+  left.append(lockup);
+  left.append(el('div', 'menu-rule'));
 
-  const stats = el('div', 'menu-stats',
-    `✦ ${s.gold} звёздных монет · 🏆 ${s.stats.wins} побед · Восхождение: ${s.campaignProgress}/${CAMPAIGN.length}`);
-  wrap.append(stats);
+  // Статы-чипы.
+  const chips = el('div', 'menu-chips');
+  const chip = (icon, text, title) => {
+    const c = el('div', 'menu-chip');
+    c.append(svgIcon(icon, 'chip-ico'), el('span', '', text));
+    c.title = title;
+    return c;
+  };
+  chips.append(chip('star', String(s.gold), 'Звёздные монеты'));
+  chips.append(chip('sword', String(s.stats.wins), 'Победы'));
+  chips.append(chip('shield', `${s.campaignProgress}/${CAMPAIGN.length}`, 'Путь Восхождения'));
+  left.append(chips);
 
-  const buttons = el('div', 'menu-buttons');
-  const btnCampaign = el('button', 'btn primary big', '⚔️ Кампания: Путь Восхождения');
-  btnCampaign.addEventListener('click', () => nav.go('campaign'));
-  const btnQuick = el('button', 'btn big', '🎲 Быстрый бой с ИИ');
-  btnQuick.addEventListener('click', () => nav.go('quickPick'));
-  const btnPvp = el('button', 'btn big', '🤝 PvP на одном экране');
-  btnPvp.addEventListener('click', () => nav.go('pvpPick'));
-  const btnCollection = el('button', 'btn big', '🃏 Коллекция Рун');
-  btnCollection.addEventListener('click', () => nav.go('collection'));
-  buttons.append(btnCampaign, btnQuick, btnPvp, btnCollection);
-  wrap.append(buttons);
+  // Режимы.
+  const modes = el('div', 'menu-modes');
+  const mode = (icon, title, desc, primary, fn) => {
+    const b = el('button', `menu-mode ${primary ? 'primary' : ''}`);
+    b.append(svgIcon(icon, 'mode-ico'));
+    const tx = el('div', 'mode-text');
+    tx.append(el('div', 'mode-title', title));
+    tx.append(el('div', 'mode-desc', desc));
+    b.append(tx);
+    b.addEventListener('click', fn);
+    return b;
+  };
+  modes.append(mode('sword', 'Путь Восхождения', 'Кампания: 10 сражений до Безвременья', true, () => nav.go('campaign')));
+  modes.append(mode('paw', 'Быстрый бой', 'Случайный противник под управлением ИИ', false, () => nav.go('quickPick')));
+  modes.append(mode('hand', 'Дуэль Восходящих', 'PvP на одном экране, передавая ход', false, () => nav.go('pvpPick')));
+  modes.append(mode('deck', 'Коллекция Рун', 'Колоды, крафт и все открытые карты', false, () => nav.go('collection')));
+  left.append(modes);
 
-  const reset = el('button', 'btn danger small-btn', 'Сбросить прогресс');
+  const reset = el('button', 'menu-reset', 'Сбросить прогресс');
   reset.addEventListener('click', async () => {
     if (await confirmDialog('Сбросить прогресс?', 'Коллекция, монеты и Восхождение будут потеряны безвозвратно.', 'Сбросить', 'Оставить')) {
       Save.resetAll(); nav.go('menu');
     }
   });
-  wrap.append(reset);
+  left.append(reset);
+  wrap.append(left);
+
+  // ---- Правая колонна: витрина Восходящих ----
+  const right = el('div', 'menu-right');
+  const showcase = el('div', 'hero-showcase');
+  const entries = Object.entries(CLASSES);
+  entries.forEach(([cls, meta], i) => {
+    const card = el('div', 'showcase-card');
+    const off = i - (entries.length - 1) / 2;
+    card.style.setProperty('--rot', (off * 7) + 'deg');
+    card.style.setProperty('--shift', (Math.abs(off) * 16) + 'px');
+    card.style.setProperty('--delay', (i * 0.7) + 's');
+    if (ART.has('hero_' + cls)) {
+      card.style.backgroundImage = `url("assets/art/hero_${cls}.webp")`;
+    }
+    card.append(el('div', 'showcase-name', meta.hero.split(',')[0]));
+    card.addEventListener('click', () => nav.go('campaign'));
+    showcase.append(card);
+  });
+  right.append(showcase);
+  wrap.append(right);
+
   root.append(wrap);
 }
 
