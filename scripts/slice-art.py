@@ -59,6 +59,20 @@ SHEETS = {
         'death_mark', 'blade_fan', 'phantoms',
         'shield_wall', 'illumination', 'red_stream',
     ],
+    'sheet7': [  # Руны второй волны (вместо переиспользованных)
+        'psi_blast', 'mind_crush', 'suppression',
+        'word_of_pain', 'word_of_void', 'heroic_surge',
+        'justice_hammer', 'sharp_throw', 'beast_call',
+        'pack_order', 'release_pack', 'spear_hail',
+        'ice_rune', 'transmute_rune', 'elimination',
+    ],
+    'sheet8': [  # Портреты боссов кампании + мелкие руны
+        'boss_c1', 'boss_c2', 'boss_c3',
+        'boss_c4', 'boss_c6', 'boss_c7',
+        'boss_c10', 'rune_nova', 'backstab',
+        'poison_vial', 'hidden_lunge', 'read_tracks',
+        'rune_spark', 'rune_frost', 'rune_mend',
+    ],
 }
 
 # Токены/карты, переиспользующие чужой арт (кому не досталось клетки).
@@ -173,6 +187,19 @@ def main():
             tile.save(out, 'WEBP', quality=80)
             produced.append(cid)
         print(f'✅ {base}: нарезано {len([x for x in ids if x])} артов')
+
+    # extras.png: 2 клетки — фон боевого стола и рубашка карты.
+    extras = find_sheet(raw_dir, 'extras')
+    if extras:
+        img = Image.open(extras).convert('RGB')
+        w, h = img.size
+        half = w // 2
+        ins = int(w * 0.015)
+        board = img.crop((ins, ins, half - ins, h - ins)).resize((900, 900), Image.LANCZOS)
+        board.save(os.path.join(out_dir, 'board_bg.webp'), 'WEBP', quality=78)
+        back = img.crop((half + ins, ins, w - ins, h - ins)).resize((400, 400), Image.LANCZOS)
+        back.save(os.path.join(out_dir, 'card_back.webp'), 'WEBP', quality=82)
+        print('✅ extras: фон стола + рубашка карты')
 
     # Переиспользование артов.
     for target, source in REUSE.items():

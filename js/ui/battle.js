@@ -213,6 +213,8 @@ export class BattleScreen {
     this.root.replaceChildren();
 
     const board = el('div', 'battle');
+    // Сгенерированный фон стола, если ассет уже нарезан.
+    if (ART.has('board_bg')) board.classList.add('has-board-bg');
     board.append(this.heroRow(foe, 'enemy'));
     board.append(this.boardRow(foe, 'enemy'));
     board.append(this.centerBar());
@@ -247,7 +249,9 @@ export class BattleScreen {
     const portrait = el('div', `hero-portrait theme-${p.heroClass}`);
     portrait.dataset.hero = side;
     const iconEl = el('div', 'hero-icon');
-    const artKey = 'hero_' + p.heroClass;
+    // Приоритет: уникальный портрет босса → портрет класса → эмодзи.
+    const bossKey = (this.mode === 'ai' && side === 'enemy') ? this.opts.enemy.artKey : null;
+    const artKey = (bossKey && ART.has(bossKey)) ? bossKey : 'hero_' + p.heroClass;
     if (ART.has(artKey)) {
       iconEl.classList.add('has-image');
       iconEl.style.backgroundImage = `url("assets/art/${artKey}.webp")`;

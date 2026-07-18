@@ -20,7 +20,7 @@ export function renderMenu(root, nav) {
   wrap.append(el('div', 'game-subtitle', 'Руны Восхождения — коллекционная карточная игра'));
 
   const stats = el('div', 'menu-stats',
-    `💰 ${s.gold} золота · 🏆 ${s.stats.wins} побед · Восхождение: ${s.campaignProgress}/${CAMPAIGN.length}`);
+    `✦ ${s.gold} звёздных монет · 🏆 ${s.stats.wins} побед · Восхождение: ${s.campaignProgress}/${CAMPAIGN.length}`);
   wrap.append(stats);
 
   const buttons = el('div', 'menu-buttons');
@@ -79,7 +79,7 @@ export function renderCampaign(root, nav) {
   const s = Save.load();
   const wrap = el('div', 'campaign-screen');
   wrap.append(el('h2', 'screen-title', '⚔️ Путь Восхождения'));
-  wrap.append(el('div', 'screen-sub', 'Одолейте десятерых — от одичавших варгов до Безвременья. Награда: золото и новые Руны.'));
+  wrap.append(el('div', 'screen-sub', 'Одолейте десятерых — от одичавших варгов до Безвременья. Награда: звёздные монеты и новые Руны.'));
 
   const path = el('div', 'campaign-path');
   CAMPAIGN.forEach((enc, i) => {
@@ -90,7 +90,7 @@ export function renderCampaign(root, nav) {
     info.append(el('div', 'enc-name', `${i + 1}. ${enc.name}`));
     info.append(el('div', 'enc-class', `${CLASSES[enc.class].icon} ${CLASSES[enc.class].name} · ${diffLabel(enc.difficulty)}${enc.boss ? ' · 👑 БОСС' : ''}`));
     if (state !== 'locked') info.append(el('div', 'enc-intro', enc.intro));
-    info.append(el('div', 'enc-reward', `Награда: 💰${enc.rewardGold} + ${enc.unlocks.length} Рун`));
+    info.append(el('div', 'enc-reward', `Награда: ✦${enc.rewardGold} + ${enc.unlocks.length} Рун`));
     node.append(info);
     if (state === 'current') {
       const btn = el('button', 'btn primary', 'В бой!');
@@ -119,7 +119,7 @@ export function renderCollection(root, nav) {
   const s = Save.load();
   const wrap = el('div', 'collection-screen');
   wrap.append(el('h2', 'screen-title', '🃏 Коллекция Рун'));
-  wrap.append(el('div', 'screen-sub', `💰 ${s.gold} золота — открывайте Руны и собирайте колоды. Ранги: Дерево · Бронза · Серебро · Золото.`));
+  wrap.append(el('div', 'screen-sub', `✦ ${s.gold} звёздных монет — открывайте Руны и собирайте колоды. Ранги: Дерево · Бронза · Серебро · Золото.`));
 
   let currentClass = nav.state.collectionClass || 'vincent';
   const tabs = el('div', 'class-tabs');
@@ -155,9 +155,9 @@ export function renderCollection(root, nav) {
       if (!owned) {
         const cost = Save.CRAFT_COST[c.rarity || 'wood'] || 40;
         const rank = RANKS[c.rarity || 'wood']?.label || 'Дерево';
-        if (confirm(`Открыть «${c.name}» (${rank}) за 💰${cost}?`)) {
+        if (confirm(`Открыть «${c.name}» (${rank}) за ✦${cost} звёздных монет?`)) {
           if (Save.spendGold(cost)) { Save.unlockCards([c.id]); renderCollection(root, nav); }
-          else alert('Недостаточно золота. Проходите кампанию!');
+          else alert('Недостаточно звёздных монет. Проходите кампанию!');
         }
         return;
       }
@@ -219,7 +219,7 @@ export function renderReward(root, nav, enc) {
   const wrap = el('div', 'reward-screen');
   wrap.append(el('h2', 'screen-title', '🏆 Победа!'));
   wrap.append(el('div', 'screen-sub', `«${enc.name}» повержен!`));
-  wrap.append(el('div', 'reward-gold', `+💰 ${enc.rewardGold} золота`));
+  wrap.append(el('div', 'reward-gold', `+✦ ${enc.rewardGold} звёздных монет`));
   const cardsRow = el('div', 'reward-cards');
   for (const id of enc.unlocks) {
     const node = buildCardEl(getCard(id), { small: false });

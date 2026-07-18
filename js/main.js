@@ -42,6 +42,7 @@ const nav = {
           difficulty: enc.difficulty,
           boss: enc.boss || null,
           startHealth: enc.enemyHealth || null,
+          artKey: 'boss_' + enc.id,
         },
         onFinish(won) {
           Save.recordResult(won);
