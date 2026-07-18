@@ -28,35 +28,40 @@ const nav = {
   },
   startCampaignBattle(index) {
     const enc = CAMPAIGN[index];
-    renderClassPick(root, nav, (cls) => {
-      new BattleScreen({
-        root,
-        mode: 'ai',
-        playerClass: cls,
-        playerDeck: Save.battleDeck(cls),
-        enemy: {
-          name: enc.name,
-          icon: enc.icon,
-          class: enc.class,
-          deck: encounterDeck(enc),
-          difficulty: enc.difficulty,
-          boss: enc.boss || null,
-          startHealth: enc.enemyHealth || null,
-          artKey: 'boss_' + enc.id,
-        },
-        onFinish(won) {
-          Save.recordResult(won);
-          if (won) {
+    const cls = nav.state.campaignClass || 'vincent';
+    new BattleScreen({
+      root,
+      mode: 'ai',
+      playerClass: cls,
+      playerDeck: Save.battleDeck(cls),
+      enemy: {
+        name: enc.name,
+        icon: enc.icon,
+        class: enc.class,
+        deck: encounterDeck(enc),
+        difficulty: enc.difficulty,
+        boss: enc.boss || null,
+        startHealth: enc.enemyHealth || null,
+        artKey: 'boss_' + enc.id,
+      },
+      onFinish(won) {
+        Save.recordResult(won);
+        if (won) {
+          const firstClear = !Save.isEncounterBeaten(index);
+          Save.beatEncounterFor(cls, index);
+          if (firstClear) {
             Save.addGold(enc.rewardGold);
             Save.unlockCards(enc.unlocks);
-            Save.beatEncounter(index);
             renderReward(root, nav, enc);
           } else {
+            Save.addGold(Math.floor(enc.rewardGold / 2));
             nav.go('campaign');
           }
-        },
-      });
-    }, `Противник: ${enc.icon} ${enc.name}`);
+        } else {
+          nav.go('campaign');
+        }
+      },
+    });
   },
 };
 
@@ -101,6 +106,11 @@ function startPvpFlow() {
 
 // ---- audio: unlock on first gesture + mute toggle button ----
 installAudioUnlock();
+// Лёгкий клик на всех кнопках интерфейса.
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.btn, .menu-mode, .tab, .campaign-hero, .showcase-card, .class-card'))
+    Audio.sfx('click');
+});
 const muteBtn = document.createElement('button');
 muteBtn.className = 'mute-btn';
 muteBtn.textContent = Audio.muted ? '🔇' : '🔊';

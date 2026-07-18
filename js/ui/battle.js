@@ -84,6 +84,10 @@ export class BattleScreen {
       }
     }
     this.logLines = [];
+    if (!localStorage.getItem('sb-hint-shown')) {
+      localStorage.setItem('sb-hint-shown', '1');
+      setTimeout(() => this.toast('Перетаскивайте карты на стол, а существ — на цели атаки'), 1200);
+    }
     this.drag = new DragController(this);
     this.lastBannerTurn = 0;
     Audio.setScene('battle');
@@ -312,6 +316,10 @@ export class BattleScreen {
     mana.append(crystals);
 
     const deckInfo = el('div', 'deck-info');
+    if (p.deck.length <= 3) deckInfo.classList.add('fatigue-warn');
+    deckInfo.title = p.deck.length === 0
+      ? 'Колода пуста! Каждый добор ранит героя усталостью.'
+      : `Карт в колоде: ${p.deck.length}`;
     if (ART.has('card_back')) {
       const back = el('span', 'deck-back-thumb');
       back.style.backgroundImage = 'url("assets/art/card_back.webp")';
@@ -359,6 +367,9 @@ export class BattleScreen {
       : this.mode === 'hotseat' ? 'Передать ход' : 'Завершить ход';
     const endBtn = el('button', 'end-turn-btn', label);
     endBtn.disabled = this.busy || this.game.over;
+    // Классический сигнал ККИ: нечего разыграть — кнопка зовёт завершить ход.
+    if (!this.busy && !this.game.over && this.game.current === this.pid && this.nothingLeftToDo())
+      endBtn.classList.add('all-done');
     endBtn.addEventListener('click', () => this.onEndTurn());
     bar.append(endBtn);
     const hints = [];
@@ -387,6 +398,19 @@ export class BattleScreen {
       row.append(node);
     });
     return row;
+  }
+
+  // Нечего разыграть и некому атаковать → пора завершать ход.
+  nothingLeftToDo() {
+    const g = this.game;
+    const p = g.players[this.pid];
+    if (p.hand.some((c) => g.canPlayCard(this.pid, c.instanceId, null).ok)) return false;
+    if (g.canUseHeroPower(this.pid, null).ok) return false;
+    const foe = g.players[this.foePid];
+    const targets = [...foe.board, foe.hero];
+    if (p.board.some((m) => targets.some((t) => g.canAttack(this.pid, m, t).ok))) return false;
+    if (targets.some((t) => g.canAttack(this.pid, p.hero, t).ok)) return false;
+    return true;
   }
 
   hintText() {

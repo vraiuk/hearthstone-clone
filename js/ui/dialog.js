@@ -6,6 +6,11 @@ import { KEYWORDS } from '../data/cards.js';
 // ---------- Модальные окна ----------
 function buildModal(title, text) {
   const overlay = el('div', 'modal-overlay');
+  overlay.tabIndex = -1;
+  overlay.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') overlay.querySelector('.modal-actions .btn:not(.primary)')?.click() ||
+      overlay.querySelector('.modal-actions .btn')?.click();
+  });
   const panel = el('div', 'modal-panel');
   panel.append(el('div', 'modal-title', title));
   if (text) panel.append(el('div', 'modal-text', text));

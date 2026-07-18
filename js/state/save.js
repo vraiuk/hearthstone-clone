@@ -18,11 +18,23 @@ function defaultSave() {
   return {
     gold: 0,
     unlocked: starterCollection(),   // card ids the player owns
-    campaignProgress: 0,             // number of encounters beaten
+    campaignProgress: 0,             // legacy: общий прогресс (для миграции)
+    campaignByClass: {},             // { class: боёв пройдено этим героем }
+    beaten: [],                      // индексы боёв, пройденных хоть кем-то
     customDecks: {},                 // { deckName: { class, cards: [] } }
     activeDeck: null,                // { class, cards } or null → use starter
     stats: { wins: 0, losses: 0, gamesPlayed: 0 },
   };
+}
+
+// Миграция старого общего прогресса: зачесть его каждому Восходящему.
+function migrate(data) {
+  if (data.campaignProgress > 0 && (!data.campaignByClass || !Object.keys(data.campaignByClass).length)) {
+    data.campaignByClass = {};
+    for (const cls of Object.keys(STARTER_DECKS)) data.campaignByClass[cls] = data.campaignProgress;
+    data.beaten = Array.from({ length: data.campaignProgress }, (_, i) => i);
+  }
+  return data;
 }
 
 let cache = null;
@@ -33,7 +45,7 @@ export function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const data = JSON.parse(raw);
-      cache = { ...defaultSave(), ...data };
+      cache = migrate({ ...defaultSave(), ...data });
       return cache;
     }
   } catch (e) { /* corrupted save → reset */ }
@@ -63,9 +75,29 @@ export function unlockCards(ids) {
 
 export function isUnlocked(id) { return load().unlocked.includes(id); }
 
-export function beatEncounter(index) {
+// ---- Кампания: прогресс отдельно для каждого Восходящего ----
+export function progressFor(cls) {
+  return load().campaignByClass[cls] || 0;
+}
+
+export function bestProgress() {
   const s = load();
-  if (index === s.campaignProgress) { s.campaignProgress += 1; save(); }
+  return Math.max(0, ...Object.values(s.campaignByClass));
+}
+
+// true, если бой уже проходили каким-либо героем (награда один раз).
+export function isEncounterBeaten(index) {
+  return load().beaten.includes(index);
+}
+
+export function beatEncounterFor(cls, index) {
+  const s = load();
+  if (index === (s.campaignByClass[cls] || 0)) {
+    s.campaignByClass[cls] = index + 1;
+    if (!s.beaten.includes(index)) s.beaten.push(index);
+    s.campaignProgress = Math.max(s.campaignProgress, s.campaignByClass[cls]);
+    save();
+  }
 }
 
 export function recordResult(won) {

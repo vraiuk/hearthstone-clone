@@ -1117,3 +1117,79 @@ button:focus-visible, .card:focus-visible, .minion:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .menu-star, .showcase-card { animation: none; }
 }
+
+/* ---------- Общий фон контент-экранов ---------- */
+.screen-bg { position: relative; min-height: 92vh; }
+.screen-bg::before {
+  content: ''; position: fixed; inset: 0; z-index: -2;
+  background: url("../assets/art/menu_bg.webp") center / cover no-repeat;
+  opacity: .18;
+}
+.screen-bg::after {
+  content: ''; position: fixed; inset: 0; z-index: -1;
+  background: linear-gradient(180deg, rgba(11,10,22,.6), rgba(11,10,22,.9));
+}
+
+/* ---------- Вкладки Восходящих в кампании ---------- */
+.campaign-heroes {
+  display: flex; gap: var(--sp-3); justify-content: center;
+  margin-bottom: var(--sp-5); flex-wrap: wrap;
+}
+.campaign-hero {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md);
+  background: rgba(24,20,48,.75); border: 1px solid #3b3566;
+  cursor: pointer; min-width: 92px;
+  transition: transform .15s, border-color .15s, box-shadow .15s;
+  backdrop-filter: blur(6px);
+}
+.campaign-hero:hover { transform: translateY(-3px); border-color: rgba(255,215,110,.5); }
+.campaign-hero.active {
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 20px rgba(255,215,110,.25);
+  background: linear-gradient(120deg, rgba(255,215,110,.12), rgba(232,61,118,.08)), rgba(28,22,52,.9);
+}
+.campaign-hero-face {
+  width: 52px; height: 52px; border-radius: 50%;
+  background-size: cover; background-position: center 20%;
+  border: 2px solid rgba(255,215,110,.4);
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.campaign-hero-name { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--text); }
+.campaign-hero-progress { font-size: var(--fs-sm); font-weight: 700; color: var(--text-dim); }
+.campaign-hero-progress.done { color: var(--gold-bright); font-size: 16px; }
+.campaign-hero.active .campaign-hero-progress { color: var(--gold-bright); }
+
+/* Боссы на пути крупнее */
+.enc-node.enc-boss { border-color: rgba(232,61,118,.45); }
+.enc-node.enc-boss .enc-icon.has-image { width: 76px; height: 76px; border-color: rgba(232,61,118,.6); }
+.enc-node.enc-boss.enc-current { box-shadow: 0 0 28px rgba(232,61,118,.25); }
+
+/* Баннер победы на экране награды */
+.reward-banner {
+  width: min(420px, 90vw); height: 150px; margin: 0 auto var(--sp-4);
+  border-radius: var(--r-lg);
+  background-size: cover; background-position: center 35%;
+  border: 1px solid rgba(255,215,110,.5);
+  box-shadow: 0 16px 50px rgba(0,0,0,.6), 0 0 40px rgba(255,215,110,.15);
+}
+
+/* Кнопка хода: всё сыграно — зовёт завершить */
+.end-turn-btn.all-done {
+  background: linear-gradient(180deg, #8ef0a0, #2f9e4f);
+  border-color: #c2f5c8;
+  box-shadow: 0 0 26px rgba(126,231,135,.55), inset 0 2px 6px rgba(255,255,255,.35);
+  animation: allDonePulse 1.6s ease-in-out infinite;
+}
+@keyframes allDonePulse {
+  50% { box-shadow: 0 0 40px rgba(126,231,135,.85), inset 0 2px 6px rgba(255,255,255,.35); }
+}
+
+/* Усталость: колода на исходе */
+.deck-info.fatigue-warn { color: #ff5d7a; }
+.deck-info.fatigue-warn .ico, .deck-info.fatigue-warn .deck-count { color: #ff5d7a; }
+.deck-info.fatigue-warn .deck-back-thumb { border-color: rgba(255,93,122,.7); }
+
+.reward-actions { display: flex; gap: var(--sp-3); justify-content: center; flex-wrap: wrap; }
+
+@media (prefers-reduced-motion: reduce) { .end-turn-btn.all-done { animation: none; } }
