@@ -2,6 +2,8 @@
 // копит их в очередь и вызывает flush() ПОСЛЕ рендера, когда DOM-ноды существ
 // уже на месте. Все эффекты — чистый CSS/DOM, без внешних ассетов.
 
+import { svgIcon } from './icons.js';
+
 function nodeFor(root, entity, pid) {
   if (!entity) return null;
   if (entity.isHero) {
@@ -189,7 +191,12 @@ export class VFX {
         const pos = this.posFor(ev.target, pid);
         if (!pos) return;
         burst(pos.x, pos.y, { count: 14, colors: ['#9a93bd', '#56508f', '#2c2950'], size: 7, dist: 70, dur: 750, shape: 'square' });
-        floatAt(pos.x, pos.y, '💀', 'fx-skull');
+        const sk = document.createElement('div');
+        sk.className = 'fx-float fx-skull';
+        sk.append(svgIcon('skull', 'ico-skull'));
+        sk.style.left = pos.x + 'px'; sk.style.top = pos.y + 'px';
+        document.body.append(sk);
+        setTimeout(() => sk.remove(), 1100);
         break;
       }
       case 'shieldPop': {

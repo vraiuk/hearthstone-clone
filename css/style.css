@@ -257,14 +257,15 @@ h1, h2 { font-weight: normal; }
 /* board */
 .board-row {
   display: flex; gap: var(--sp-3); justify-content: center; align-items: center;
-  min-height: 122px; padding: var(--sp-2);
+  min-height: 152px; padding: var(--sp-2);
   background: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.32));
   border-radius: var(--r-lg); border: var(--hairline);
 }
 .board-empty { color: rgba(255,255,255,.06); font-size: 13px; }
 
 .minion {
-  position: relative; width: 94px; height: 108px; border-radius: 10px; cursor: pointer;
+  position: relative; width: 96px; aspect-ratio: 5 / 7; height: auto;
+  flex: 0 1 96px; min-width: 64px; border-radius: 10px; cursor: pointer;
   background: linear-gradient(180deg, #232043, #171531);
   border: 2px solid #56508f; text-align: center;
   transition: transform .14s, border-color .14s, box-shadow .14s;
@@ -392,7 +393,7 @@ h1, h2 { font-weight: normal; }
   .battle-log { display: none; }
   .card-name { font-size: 9px; }
   .card-text { font-size: 8px; }
-  .minion { width: 76px; height: 90px; }
+  .minion { width: 78px; }
   .minion-art { width: 54px; height: 36px; font-size: 22px; }
   .hero-portrait { width: 120px; }
   .hero-row { grid-template-columns: 130px 52px 120px 52px 70px; gap: var(--sp-2); }
@@ -835,7 +836,103 @@ button:focus-visible, .card:focus-visible, .minion:focus-visible {
   background: #33172a; border: 1px solid #6d2c47;
 }
 .crystal.full {
-  background: radial-gradient(circle at 35% 35%, #ff8fa8, #a01238);
-  border-color: #ffb1c1;
-  box-shadow: 0 0 7px rgba(255,93,122,.75);
+  background: linear-gradient(160deg, #b44df0 0%, #e83d76 55%, #7a1440 100%);
+  border-color: #e2a9ff;
+  box-shadow: 0 0 8px rgba(180,77,240,.8), 0 0 3px rgba(255,255,255,.5) inset;
 }
+
+/* ---------- Чип Аспекта героя ---------- */
+.hero-power {
+  position: relative;
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,.18), transparent 55%),
+    linear-gradient(160deg, #3c3670, #221e45);
+  border: 2px solid #7a71c4;
+  box-shadow: 0 3px 10px rgba(0,0,0,.5);
+  transition: transform .15s, filter .15s, box-shadow .15s;
+}
+.ico-aspect { width: 28px; height: 28px; margin: 0; color: #dcd6ff; filter: drop-shadow(0 1px 3px rgba(0,0,0,.7)); }
+.power-cost {
+  position: absolute; top: -7px; right: -7px;
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff;
+  background: linear-gradient(160deg, #b44df0, #7a1440);
+  border: 2px solid #e2a9ff;
+}
+.hero-power.used { filter: grayscale(.85) brightness(.55); cursor: default; }
+.hero-power.used .power-cost { display: none; }
+
+/* ---------- Тултипы ---------- */
+.game-tooltip {
+  position: fixed; z-index: 400; max-width: 280px; pointer-events: none;
+  background: rgba(16,13,32,.96);
+  border: 1px solid rgba(255,215,110,.35); border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-4);
+  box-shadow: 0 14px 40px rgba(0,0,0,.7), 0 0 24px rgba(160,120,255,.15);
+  backdrop-filter: blur(8px);
+  opacity: 0; transform: translateY(4px); transition: opacity .18s, transform .18s;
+}
+.game-tooltip.show { opacity: 1; transform: none; }
+.tip-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
+.tip-name { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--gold-bright); }
+.tip-cost {
+  flex-shrink: 0; min-width: 24px; height: 24px; border-radius: 50%; padding: 0 4px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 13px; color: #fff;
+  background: linear-gradient(160deg, #b44df0, #7a1440); border: 1px solid #e2a9ff;
+}
+.tip-type { font-size: var(--fs-sm); color: var(--text-dim); margin-top: 2px; letter-spacing: .4px; }
+.tip-text { font-size: var(--fs-base); line-height: 1.45; margin-top: var(--sp-2); }
+.tip-extra { font-size: var(--fs-sm); color: #cbb7ff; margin-top: var(--sp-1); }
+.tip-glossary { margin-top: var(--sp-2); padding-top: var(--sp-2); border-top: var(--hairline); }
+.tip-kw { font-size: var(--fs-sm); color: var(--text-dim); line-height: 1.45; margin-top: 2px; }
+.tip-kw b { color: var(--text); font-weight: 600; }
+
+/* ---------- Модалки ---------- */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(6,4,14,.6); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .2s;
+}
+.modal-overlay.show { opacity: 1; }
+.modal-panel {
+  width: min(400px, calc(100vw - 40px));
+  background: linear-gradient(180deg, #262347, #161430);
+  border: 1px solid rgba(255,215,110,.4); border-radius: var(--r-lg);
+  padding: var(--sp-5) var(--sp-6);
+  box-shadow: 0 24px 70px rgba(0,0,0,.75), 0 0 40px rgba(160,120,255,.12);
+  transform: scale(.94); transition: transform .2s;
+}
+.modal-overlay.show .modal-panel { transform: none; }
+.modal-title { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--gold-bright); }
+.modal-text { font-size: var(--fs-base); line-height: 1.5; color: var(--text-dim); margin-top: var(--sp-2); }
+.modal-actions { display: flex; gap: var(--sp-3); justify-content: flex-end; margin-top: var(--sp-5); }
+
+/* ---------- Тосты и тогл звука ---------- */
+.toast {
+  top: auto; bottom: 96px; padding: 10px 22px;
+  font-family: var(--font-body); font-weight: 600; font-size: var(--fs-base);
+  background: rgba(16,13,32,.94); color: var(--text);
+  border: 1px solid rgba(255,93,122,.5); border-radius: 24px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.6);
+}
+.mute-btn {
+  background: rgba(22,18,44,.92); border: 1px solid rgba(255,215,110,.3);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.5);
+}
+
+/* Череп смерти */
+.ico-skull { width: 26px; height: 26px; margin: 0; color: #cfc9e8; filter: drop-shadow(0 0 6px rgba(120,110,180,.8)); }
+.fx-skull { transform: translate(-50%, -50%); }
+
+/* Панели конца боя и передачи хода */
+.end-overlay { backdrop-filter: blur(6px); }
+.end-panel { border: 1px solid rgba(255,215,110,.45); box-shadow: 0 24px 80px rgba(0,0,0,.8), 0 0 60px rgba(160,120,255,.15); }
+.end-sub { font-size: var(--fs-base); line-height: 1.5; }

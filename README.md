@@ -90,4 +90,8 @@ js/
 
 ## Лицензия
 
-MIT. Код и арт (CSS/эмодзи) — оригинальные.
+MIT. Названия карт и персонажей — оригинальные; арт карт сгенерирован ИИ
+для этого проекта. Иконки инфографики (череп, щит, меч, аспекты героев) —
+[game-icons.net](https://game-icons.net) © Lorc, Delapouite
+([CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)).
+Шрифты: Cormorant, Manrope (Google Fonts, OFL).

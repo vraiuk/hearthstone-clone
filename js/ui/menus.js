@@ -9,6 +9,7 @@ import { collectibleForClass, getCard, RANKS } from '../data/cards.js';
 import * as Save from '../state/save.js';
 import { Audio } from '../audio/audio.js';
 import { ART } from '../data/art-manifest.js';
+import { confirmDialog, alertDialog } from './dialog.js';
 
 export function renderMenu(root, nav) {
   root.replaceChildren();
@@ -41,8 +42,10 @@ export function renderMenu(root, nav) {
   wrap.append(buttons);
 
   const reset = el('button', 'btn danger small-btn', 'Сбросить прогресс');
-  reset.addEventListener('click', () => {
-    if (confirm('Точно сбросить весь прогресс?')) { Save.resetAll(); nav.go('menu'); }
+  reset.addEventListener('click', async () => {
+    if (await confirmDialog('Сбросить прогресс?', 'Коллекция, монеты и Восхождение будут потеряны безвозвратно.', 'Сбросить', 'Оставить')) {
+      Save.resetAll(); nav.go('menu');
+    }
   });
   wrap.append(reset);
   root.append(wrap);
@@ -168,10 +171,12 @@ export function renderCollection(root, nav) {
       if (!owned) {
         const cost = Save.CRAFT_COST[c.rarity || 'wood'] || 40;
         const rank = RANKS[c.rarity || 'wood']?.label || 'Дерево';
-        if (confirm(`Открыть «${c.name}» (${rank}) за ✦${cost} звёздных монет?`)) {
-          if (Save.spendGold(cost)) { Save.unlockCards([c.id]); renderCollection(root, nav); }
-          else alert('Недостаточно звёздных монет. Проходите кампанию!');
-        }
+        confirmDialog(`Открыть «${c.name}»?`, `Ранг: ${rank}. Стоимость: ✦${cost} звёздных монет.`, 'Открыть', 'Не сейчас')
+          .then((ok) => {
+            if (!ok) return;
+            if (Save.spendGold(cost)) { Save.unlockCards([c.id]); renderCollection(root, nav); }
+            else alertDialog('Не хватает монет', 'Проходите кампанию и побеждайте боссов — они щедры на звёздные монеты.');
+          });
         return;
       }
       if (inDeck < MAX_COPIES && deck.length < DECK_SIZE) {

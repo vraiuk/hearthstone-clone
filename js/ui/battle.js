@@ -8,7 +8,8 @@ import { buildCardEl, buildMinionEl, el } from './cardRender.js';
 import { CLASSES } from '../data/decks.js';
 import { Audio } from '../audio/audio.js';
 import { VFX, ringBurst, flyCard } from './vfx.js';
-import { svgIcon } from './icons.js';
+import { svgIcon, ASPECT_ICONS } from './icons.js';
+import { attachTooltip, cardTipContent } from './dialog.js';
 import { ART } from '../data/art-manifest.js';
 import { DragController } from './drag.js';
 
@@ -283,13 +284,19 @@ export class BattleScreen {
     if (p.hero.shieldCharges > 0) portrait.append(el('div', 'hero-torq', `📿×${p.hero.shieldCharges}`));
     if (p.hero.frozen) portrait.classList.add('is-frozen');
 
-    // Аспект героя.
+    // Аспект героя: иконка + стоимость, тултип с полным описанием.
     const power = HERO_POWERS[p.heroClass];
     const cost = power.cost ?? 2;
-    const powerBtn = el('div', 'hero-power', power.icon);
-    powerBtn.title = `${power.name}: ${power.desc} (${cost} Звёздной Крови)`;
+    const powerBtn = el('div', 'hero-power');
+    powerBtn.append(svgIcon(ASPECT_ICONS[p.heroClass] || 'star', 'ico-aspect'));
+    powerBtn.append(el('span', 'power-cost', String(cost)));
     if (p.heroPowerUsed || p.mana < cost) powerBtn.classList.add('used');
     powerBtn.dataset.power = side;
+    attachTooltip(powerBtn, () => cardTipContent({
+      name: power.name, cost, type: 'Аспект Восходящего',
+      text: power.desc,
+      extra: [p.heroPowerUsed ? 'Уже использован в этом ходу.' : 'Раз в ход. Перетащите на цель или кликните.'],
+    }));
 
     // Звёздная Кровь (мана).
     const mana = el('div', 'mana-bar');

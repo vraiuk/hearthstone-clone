@@ -3,6 +3,7 @@
 
 import { KEYWORDS, RANKS } from '../data/cards.js';
 import { ART } from '../data/art-manifest.js';
+import { attachTooltip, cardTipContent } from './dialog.js';
 
 // Арт-бокс: ИИ-картинка, если она нарезана, иначе эмодзи на градиенте.
 function applyArt(node, key, emoji) {
@@ -66,6 +67,12 @@ export function buildCardEl(card, opts = {}) {
     root.append(dot);
   }
   if (opts.locked) root.append(el('div', 'card-lock', '🔒'));
+  const typeLabel = card.type === 'minion' ? 'Существо' : card.type === 'weapon' ? 'Оружие' : 'Руна';
+  attachTooltip(root, () => cardTipContent({
+    name: card.name, cost: card.cost, type: typeLabel,
+    text: card.text, keywords: card.keywords || [],
+    extra: card.gloryCost ? [`Титул: требует ${card.gloryCost} Славы`] : [],
+  }));
   return root;
 }
 
@@ -108,6 +115,17 @@ export function buildMinionEl(m, game) {
   if (m.shackled) badges.append(el('span', 'badge', '⛓️'));
   if (m.keywords.has('stealth') && !m.silenced) badges.append(el('span', 'badge', '🌫️'));
   if (badges.children.length) root.append(badges);
+  attachTooltip(root, () => cardTipContent({
+    name: m.name, cost: null, type: `${atk} атака · ${m.health} здоровье`,
+    text: m.silenced ? 'Немота: способности отключены.' : '',
+    keywords: [...m.keywords],
+    extra: [
+      ...(m.spellShield ? ['Боевой Доспех: отразит первую вражескую руну.'] : []),
+      ...(m.shackled ? ['Сковано Живыми Цепями — не может атаковать.'] : []),
+      ...(m.frozen ? ['Заморожено до следующего хода.'] : []),
+      ...(m.spellDamage && !m.silenced ? [`Сила рун +${m.spellDamage}.`] : []),
+    ],
+  }));
   return root;
 }
 
