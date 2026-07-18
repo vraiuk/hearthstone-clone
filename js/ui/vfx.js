@@ -33,6 +33,39 @@ function floatNumber(node, text, cls) {
   floatAt(x, y, text, cls);
 }
 
+// Расширяющееся кольцо (призыв существа, мощные эффекты).
+export function ringBurst(x, y, color = '#ffd76e') {
+  const r = document.createElement('div');
+  r.className = 'fx-ring';
+  r.style.cssText = `left:${x}px;top:${y}px;border-color:${color};`;
+  document.body.append(r);
+  setTimeout(() => r.remove(), 650);
+}
+
+// Ударная волна в точке попадания.
+export function impactRipple(x, y) {
+  const r = document.createElement('div');
+  r.className = 'fx-ripple';
+  r.style.cssText = `left:${x}px;top:${y}px;`;
+  document.body.append(r);
+  setTimeout(() => r.remove(), 500);
+}
+
+// Полёт клона карты из руки в точку на столе (розыгрыш).
+export function flyCard(cardNode, toX, toY, onDone) {
+  const rect = cardNode.getBoundingClientRect();
+  const clone = cardNode.cloneNode(true);
+  clone.className = cardNode.className + ' fx-fly-card';
+  clone.style.cssText = `left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;`;
+  document.body.append(clone);
+  requestAnimationFrame(() => {
+    clone.style.transform =
+      `translate(${toX - rect.left - rect.width / 2}px, ${toY - rect.top - rect.height / 2}px) scale(.55) rotate(4deg)`;
+    clone.style.opacity = '0';
+  });
+  setTimeout(() => { clone.remove(); onDone && onDone(); }, 340);
+}
+
 // Гаснущая дуга атаки «кто → кого» — считывается направление удара.
 function attackTrail(from, to) {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -136,7 +169,7 @@ export class VFX {
         const node = nodeFor(root, ev.target, pid);
         const pos = this.posFor(ev.target, pid);
         if (!pos) return;
-        floatAt(pos.x, pos.y, `−${ev.amount}`, 'fx-dmg');
+        floatAt(pos.x, pos.y, `−${ev.amount}`, ev.amount >= 5 ? 'fx-dmg fx-crit' : 'fx-dmg');
         if (node) flash(node, 'fx-hit');
         burst(pos.x, pos.y, { count: 8, colors: ['#ff5d7a', '#ffb1c1', '#c0392b'], size: 5, dist: 40 });
         if (ev.amount >= 5) shake(root, ev.amount >= 8);
@@ -180,8 +213,9 @@ export class VFX {
         }
         // След удара: гаснущая алая дуга «кто → кого».
         attackTrail(from, to);
-        // Искры в точке контакта чуть позже выпада.
+        // Ударная волна + искры в точке контакта чуть позже выпада.
         setTimeout(() => {
+          impactRipple(to.x, to.y);
           burst(to.x, to.y, { count: 10, colors: ['#ffd76e', '#ff5d7a', '#fff'], size: 4, dist: 34, dur: 450 });
         }, 140);
         break;

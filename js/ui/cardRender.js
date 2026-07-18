@@ -69,10 +69,15 @@ export function buildCardEl(card, opts = {}) {
   return root;
 }
 
-// A minion on the board.
+// A minion on the board. С ИИ-артом тайл становится арт-доминантным:
+// картинка на весь тайл, имя на градиентной плашке снизу.
 export function buildMinionEl(m, game) {
   const root = el('div', `minion theme-${m.theme || 'nature'}`);
   root.dataset.instanceId = m.instanceId;
+  if (ART.has(m.cardId)) {
+    root.classList.add('art-full');
+    root.style.backgroundImage = `url("assets/art/${m.cardId}.webp")`;
+  }
   const atk = game ? game.effectiveAttack(m) : m.attack;
 
   if (m.keywords.has('taunt') && !m.silenced) root.classList.add('has-taunt');

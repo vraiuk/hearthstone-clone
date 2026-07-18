@@ -15,7 +15,12 @@ export function renderMenu(root, nav) {
   Audio.setScene('menu');
   const s = Save.load();
   const wrap = el('div', 'menu-screen');
-  wrap.append(el('div', 'game-logo', '🌌'));
+  const logo = el('div', 'game-logo');
+  if (ART.has('logo_emblem')) {
+    logo.classList.add('has-image');
+    logo.style.backgroundImage = 'url("assets/art/logo_emblem.webp")';
+  } else logo.textContent = '🌌';
+  wrap.append(logo);
   wrap.append(el('h1', 'game-title', 'Звёздная Кровь'));
   wrap.append(el('div', 'game-subtitle', 'Руны Восхождения — коллекционная карточная игра'));
 

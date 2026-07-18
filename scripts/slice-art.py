@@ -73,6 +73,13 @@ SHEETS = {
         'poison_vial', 'hidden_lunge', 'read_tracks',
         'rune_spark', 'rune_frost', 'rune_mend',
     ],
+    'sheet9': [  # Токены, оставшиеся карты, экраны исхода
+        'token_vargToken', 'token_vargPup', 'token_larva',
+        'token_karkhCub', 'token_tauroCalf', 'token_wildBoar',
+        'token_oldTauro', 'token_skyKarkh', 'token_kidoWreck',
+        'token_slug', 'mind_thief', 'prophetess',
+        'logo_emblem', 'victory_art', 'defeat_art',
+    ],
 }
 
 # Токены/карты, переиспользующие чужой арт (кому не досталось клетки).

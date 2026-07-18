@@ -12,14 +12,14 @@ import { STARTER_DECKS } from './decks.js';
 export const CAMPAIGN = [
   {
     id: 'c1', name: 'Одичавший варг-вожак', icon: '🐺', class: 'aino',
-    difficulty: 'easy', deckMod: 'weak', enemyHealth: 22,
+    difficulty: 'easy', deckMod: 'weak', enemyHealth: 18,
     intro: 'Стая одичала без хозяина. Покажи равнинам, кто здесь Восходящий.',
     rewardGold: 100,
     unlocks: ['sigurd', 'silver_trout'],
   },
   {
     id: 'c2', name: 'Шёпот из Гнезда', icon: '🐛', class: 'mrak',
-    difficulty: 'easy', deckMod: 'weak', enemyHealth: 26,
+    difficulty: 'easy', deckMod: 'weak', enemyHealth: 24,
     intro: 'Черви прогрызают тоннели под равниной. Их разведчик уже здесь.',
     rewardGold: 100,
     unlocks: ['plague_carrier', 'whirlwing'],

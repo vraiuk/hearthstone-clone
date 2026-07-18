@@ -7,7 +7,7 @@ import { AI } from '../ai/ai.js';
 import { buildCardEl, buildMinionEl, el } from './cardRender.js';
 import { CLASSES } from '../data/decks.js';
 import { Audio } from '../audio/audio.js';
-import { VFX } from './vfx.js';
+import { VFX, ringBurst, flyCard } from './vfx.js';
 import { ART } from '../data/art-manifest.js';
 import { DragController } from './drag.js';
 
@@ -450,9 +450,19 @@ export class BattleScreen {
   }
 
   playCard(card, target) {
+    // Полёт карты из руки: точка старта — нода в руке, цель — свой стол.
+    const handNode = this.root.querySelector(`.hand-row .card[data-instance-id="${card.instanceId}"]`);
+    const rowRect = this.root.querySelector('.board-friendly')?.getBoundingClientRect();
     const res = this.game.playCard(this.pid, card.instanceId, target);
-    if (!res.ok) this.toast(res.reason);
-    else Audio.sfx('play');
+    if (!res.ok) { this.toast(res.reason); this.selected = null; this.render(); return; }
+    Audio.sfx('play');
+    if (handNode && rowRect) {
+      const toX = rowRect.left + rowRect.width / 2;
+      const toY = rowRect.top + rowRect.height / 2;
+      flyCard(handNode, toX, toY, () => {
+        if (card.type === 'minion') ringBurst(toX, toY);
+      });
+    }
     this.selected = null;
     this.render();
   }
@@ -613,6 +623,14 @@ export class BattleScreen {
     }
     const overlay = el('div', 'end-overlay');
     const panel = el('div', 'end-panel');
+    // Арт исхода боя, если ассет нарезан.
+    const wonForArt = this.mode === 'hotseat' ? true : this.game.winner === 0;
+    const outcomeKey = wonForArt ? 'victory_art' : 'defeat_art';
+    if (ART.has(outcomeKey)) {
+      const artEl = el('div', 'end-art');
+      artEl.style.backgroundImage = `url("assets/art/${outcomeKey}.webp")`;
+      panel.append(artEl);
+    }
     if (this.mode === 'hotseat') {
       const w = this.game.winner;
       const title = w === -1 ? '⚖️ Ничья!' : `🏆 ${this.game.players[w].name} побеждает!`;

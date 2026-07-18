@@ -687,3 +687,100 @@ button:focus-visible, .card:focus-visible, .minion:focus-visible {
   border: 2px solid rgba(255,215,110,.45);
   box-shadow: 0 0 12px rgba(160,120,255,.3);
 }
+
+/* ---------- Арт-доминантные тайлы существ ---------- */
+.minion.art-full {
+  background-size: cover;
+  background-position: center 22%;
+}
+.minion.art-full .minion-art { display: none; }
+.minion.art-full .minion-name {
+  position: absolute; left: 0; right: 0; bottom: 14px;
+  background: linear-gradient(180deg, transparent, rgba(8,6,18,.92) 35%);
+  padding: 10px 4px 3px; line-height: 1.15;
+  text-shadow: 0 1px 3px rgba(0,0,0,.95);
+  flex: none; display: block;
+}
+/* Карта в руке: арт выше, фокус на верхней трети (лица/силуэты) */
+.card-art { height: 86px; }
+.card-art.has-image { background-position: center 25%; }
+.card-name { min-height: 24px; }
+
+/* ---------- Сочные анимации боя ---------- */
+.fx-ring {
+  position: fixed; z-index: 300; pointer-events: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 3px solid #ffd76e;
+  transform: translate(-50%, -50%);
+  animation: fxRing .6s ease-out forwards;
+}
+@keyframes fxRing {
+  0% { width: 16px; height: 16px; opacity: 1; border-width: 4px; }
+  100% { width: 120px; height: 120px; opacity: 0; border-width: 1px; }
+}
+
+.fx-ripple {
+  position: fixed; z-index: 296; pointer-events: none;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,215,110,.55), transparent 70%);
+  transform: translate(-50%, -50%);
+  animation: fxRipple .45s ease-out forwards;
+}
+@keyframes fxRipple {
+  100% { width: 130px; height: 130px; opacity: 0; }
+}
+
+.fx-fly-card {
+  position: fixed; z-index: 345; pointer-events: none; margin: 0 !important;
+  transition: transform .32s cubic-bezier(.5, .1, .6, 1), opacity .32s ease;
+}
+
+/* Замах → рывок: атака с весом */
+@keyframes fxLunge {
+  18% { transform: translate(calc(var(--lx, 0) * -0.18), calc(var(--ly, -20px) * -0.18)) scale(.96); }
+  55% { transform: translate(var(--lx, 0), var(--ly, -20px)) scale(1.14); }
+  70% { transform: translate(calc(var(--lx, 0) * .82), calc(var(--ly, -20px) * .82)) scale(1.08); }
+}
+.fx-lunge { animation-duration: .42s !important; }
+
+/* Дыхание играбельных карт и готового Аспекта */
+@keyframes readyPulse {
+  0%, 100% { box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 10px rgba(143,199,255,.22); }
+  50% { box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 20px rgba(143,199,255,.5); }
+}
+.hand-row .card:not(.unplayable) { animation: readyPulse 2.2s ease-in-out infinite; }
+.hand-row .card:not(.unplayable):hover { animation: none; }
+@keyframes powerPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(134,179,232,.3); }
+  50% { box-shadow: 0 0 20px rgba(134,179,232,.7); }
+}
+.hero-row.hero-friendly .hero-power:not(.used) { animation: powerPulse 2.2s ease-in-out infinite; }
+
+/* Крит-числа: крупный урон бьёт по глазам */
+.fx-dmg { font-size: 26px; }
+.fx-float.fx-crit { font-size: 38px; letter-spacing: 1px; animation-name: fxFloatCrit; }
+@keyframes fxFloatCrit {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.4) rotate(-6deg); }
+  14% { opacity: 1; transform: translate(-50%, -58%) scale(1.5) rotate(3deg); }
+  28% { transform: translate(-50%, -62%) scale(1.25) rotate(-1deg); }
+  100% { opacity: 0; transform: translate(-50%, -170%) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hand-row .card:not(.unplayable),
+  .hero-row.hero-friendly .hero-power:not(.used) { animation: none; }
+  .fx-fly-card { transition-duration: .01s; }
+}
+
+/* Логотип-эмблема и арт исхода боя (после нарезки sheet9) */
+.game-logo.has-image {
+  width: 130px; height: 130px; border-radius: 50%;
+  background-size: cover; background-position: center;
+  border: 2px solid rgba(255,215,110,.5);
+  box-shadow: 0 0 34px rgba(160,120,255,.45);
+}
+.end-art {
+  width: 220px; height: 130px; margin: 0 auto 16px; border-radius: var(--r-md);
+  background-size: cover; background-position: center 30%;
+  border: 1px solid rgba(255,215,110,.4);
+}
