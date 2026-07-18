@@ -1,7 +1,7 @@
 // DOM builders for cards and minions. Shared by the battle screen and the
 // collection/deck editor. Pure functions: state in, element out.
 
-import { KEYWORDS } from '../data/cards.js';
+import { KEYWORDS, RANKS } from '../data/cards.js';
 
 export function el(tag, cls, text) {
   const node = document.createElement(tag);
@@ -20,12 +20,19 @@ export function buildCardEl(card, opts = {}) {
   root.dataset.cardId = card.id || '';
 
   const cost = el('div', 'card-cost', String(card.cost));
+  cost.title = 'Стоимость в Звёздной Крови';
   const art = el('div', 'card-art');
   art.textContent = card.art || '❔';
   const name = el('div', 'card-name', card.name);
   const text = el('div', 'card-text', card.text || '');
 
   root.append(cost, art, name, text);
+
+  if (card.gloryCost) {
+    const glory = el('div', 'card-glory', `⭐${card.gloryCost}`);
+    glory.title = `Титульная карта: требует ${card.gloryCost} Славы`;
+    root.append(glory);
+  }
 
   if (card.type === 'minion') {
     root.append(
@@ -41,8 +48,10 @@ export function buildCardEl(card, opts = {}) {
   } else {
     root.classList.add('is-spell');
   }
-  if (card.rarity && card.rarity !== 'basic') {
-    root.append(el('div', `card-rarity rarity-${card.rarity}`));
+  if (card.rarity && card.rarity !== 'wood') {
+    const dot = el('div', `card-rarity rarity-${card.rarity}`);
+    dot.title = RANKS[card.rarity]?.label || '';
+    root.append(dot);
   }
   if (opts.locked) root.append(el('div', 'card-lock', '🔒'));
   return root;
@@ -58,6 +67,8 @@ export function buildMinionEl(m, game) {
   if (m.divineShield) root.classList.add('has-shield');
   if (m.frozen) root.classList.add('is-frozen');
   if (m.silenced) root.classList.add('is-silenced');
+  if (m.shackled) root.classList.add('is-shackled');
+  if (m.keywords.has('stealth') && !m.silenced) root.classList.add('is-stealth');
 
   const art = el('div', 'minion-art', m.art || '❔');
   const name = el('div', 'minion-name', m.name);
@@ -65,6 +76,7 @@ export function buildMinionEl(m, game) {
   const a = el('span', 'minion-attack', String(atk));
   const h = el('span', 'minion-health', String(m.health));
   if (m.health < m.maxHealth) h.classList.add('damaged');
+  if (game && atk > m.attack) a.classList.add('buffed'); // Связь и баффы
   stats.append(a, h);
   root.append(art, name, stats);
 
@@ -74,6 +86,9 @@ export function buildMinionEl(m, game) {
   if (m.keywords.has('lifesteal')) badges.append(el('span', 'badge', '🩸'));
   if (m.keywords.has('poisonous') && !m.silenced) badges.append(el('span', 'badge', '☠️'));
   if (m.keywords.has('windfury')) badges.append(el('span', 'badge', '🌀'));
+  if (m.spellShield) badges.append(el('span', 'badge', '🔰'));
+  if (m.shackled) badges.append(el('span', 'badge', '⛓️'));
+  if (m.keywords.has('stealth') && !m.silenced) badges.append(el('span', 'badge', '🌫️'));
   if (badges.children.length) root.append(badges);
   return root;
 }

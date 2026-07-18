@@ -1,6 +1,6 @@
-// Campaign: a 10-encounter journey with escalating difficulty and bosses.
-// Each encounter defines the enemy hero, deck, AI difficulty, optional boss
-// modifiers, and rewards (gold + unlocked cards).
+// Кампания «Путь Восхождения»: 10 сражений с нарастающей сложностью.
+// Каждое — вражеский Восходящий, колода, ИИ-уровень, боссовые модификаторы
+// и награды (Звёздное золото + новые Руны в коллекцию).
 
 import { STARTER_DECKS } from './decks.js';
 
@@ -8,95 +8,99 @@ import { STARTER_DECKS } from './decks.js';
 //   extraHealth: N       — boss starts with more health
 //   startArmor: N        — boss starts with armor
 //   openingBoard: [tok]  — boss starts with tokens on board
-//   doubleHeroPower: true — boss hero power usable twice per turn (AI)
+//   doubleHeroPower: true — boss uses its Aspect twice per turn
 export const CAMPAIGN = [
   {
-    id: 'c1', name: 'Разбойник с большой дороги', icon: '🗡️', class: 'hunter',
+    id: 'c1', name: 'Одичавший варг-вожак', icon: '🐺', class: 'aino',
     difficulty: 'easy', deckMod: 'weak',
-    intro: 'Первый противник на пути к славе. Он полагается на грубую силу.',
+    intro: 'Стая одичала без хозяина. Покажи равнинам, кто здесь Восходящий.',
     rewardGold: 100,
-    unlocks: ['argent_squire', 'vampire_bat'],
+    unlocks: ['sigurd', 'silver_trout'],
   },
   {
-    id: 'c2', name: 'Болотная ведьма', icon: '🧹', class: 'mage',
+    id: 'c2', name: 'Шёпот из Гнезда', icon: '🐛', class: 'mrak',
     difficulty: 'easy', deckMod: 'weak',
-    intro: 'Колдует в трясине и не любит гостей. Осторожнее с её заклинаниями.',
+    intro: 'Черви прогрызают тоннели под равниной. Их разведчик уже здесь.',
     rewardGold: 100,
-    unlocks: ['rush_drake', 'aimed_shot'],
+    unlocks: ['plague_carrier', 'whirlwing'],
   },
   {
-    id: 'c3', name: 'Капитан наёмников', icon: '🪖', class: 'warrior',
+    id: 'c3', name: 'Страж рудников', icon: '⛏️', class: 'vincent',
     difficulty: 'normal',
-    intro: 'Ветеран сотни битв. Его броня крепка, а топор — острее слов.',
+    intro: 'Народ Земли не пускает чужаков к жилам Звёздной Крови.',
     rewardGold: 150,
-    unlocks: ['mortal_strike', 'siege_machine'],
+    unlocks: ['tolya_grohot', 'siege_kido'],
   },
   {
-    id: 'c4', name: 'Тёмный проповедник', icon: '📿', class: 'priest',
+    id: 'c4', name: 'Речной шаман', icon: '🌊', class: 'veronika',
     difficulty: 'normal',
-    intro: 'Лечит своих и хоронит чужих. Не давай ему затянуть игру.',
+    intro: 'Народ Реки говорит с течением — и течение шепчет ему твои ходы.',
     rewardGold: 150,
-    unlocks: ['prayer', 'war_hawk'],
+    unlocks: ['aurvak', 'mind_thief'],
   },
   {
-    id: 'c5', name: 'Хозяин арены', icon: '🏛️', class: 'warrior',
+    id: 'c5', name: 'Толя Грохот', icon: '🪨', class: 'vincent',
     difficulty: 'normal', boss: { startArmor: 5 },
-    intro: 'БОСС. Начинает бой с 5 брони. Толпа жаждет зрелища!',
+    intro: 'БОСС. Живая гора в Боевом Доспехе. Начинает бой с 5 брони.',
     rewardGold: 250,
-    unlocks: ['banner_warrior', 'plague_rat'],
+    unlocks: ['igg_hammer', 'torq', 'rotting_golem'],
+    addCards: ['tolya_grohot', 'tolya_grohot'],
   },
   {
-    id: 'c6', name: 'Ледяная вдова', icon: '🕸️', class: 'mage',
-    difficulty: 'normal', boss: { openingBoard: ['spiderling', 'spiderling'] },
-    intro: 'БОСС. Начинает бой с паучками на столе. Держи удар с первого хода.',
+    id: 'c6', name: 'Ледяная Заводь', icon: '🧊', class: 'azimandia',
+    difficulty: 'normal', boss: { openingBoard: ['iceShard', 'iceShard'] },
+    intro: 'БОСС. Хозяйка заводи начинает бой с ледяными осколками на столе.',
     rewardGold: 250,
-    unlocks: ['blizzard', 'harpy'],
+    unlocks: ['star_ice', 'timeless_echo', 'lendo'],
   },
   {
-    id: 'c7', name: 'Повелитель зверей', icon: '🐗', class: 'hunter',
+    id: 'c7', name: 'Вожак Дикой Охоты', icon: '🌕', class: 'aino',
     difficulty: 'hard',
-    intro: 'Его звери чуют страх. Зачищай поле или умри под лапами.',
+    intro: 'Когда встаёт полная луна, звери равнин отвечают только ему.',
     rewardGold: 200,
-    unlocks: ['alpha_wolf', 'crusader'],
+    unlocks: ['wild_hunt', 'pack_leader', 'elder_varg'],
+    addCards: ['wild_hunt'],
   },
   {
-    id: 'c8', name: 'Инквизитор света', icon: '☀️', class: 'priest',
+    id: 'c8', name: 'Матка Гнезда', icon: '🕸️', class: 'mrak',
     difficulty: 'hard', boss: { extraHealth: 10 },
-    intro: 'БОСС. 40 здоровья и бесконечное исцеление. Запасись уроном.',
+    intro: 'БОСС. 40 здоровья и бесконечный Рой. Личинки не кончаются никогда.',
     rewardGold: 300,
-    unlocks: ['archbishop'],
+    unlocks: ['nest_queen', 'imago_executioner', 'death_mark'],
+    addCards: ['nest_queen', 'nest_queen'],
   },
   {
-    id: 'c9', name: 'Генерал легиона', icon: '👹', class: 'warrior',
+    id: 'c9', name: 'Белый Дьявол', icon: '👤', class: 'mrak',
     difficulty: 'hard', boss: { startArmor: 8 },
-    intro: 'БОСС. 8 брони и элитные войска. Это уже не игрушки.',
+    intro: 'БОСС. Тень с 8 брони. Говорят, его клинки не знают промаха.',
     rewardGold: 300,
-    unlocks: ['fire_comet'],
+    unlocks: ['executioner_blades', 'night_terror', 'will_empress'],
+    addCards: ['executioner_blades', 'night_terror', 'night_terror'],
   },
   {
-    id: 'c10', name: 'Архимаг бездны', icon: '🌀', class: 'mage',
+    id: 'c10', name: 'Азимандия Безвременья', icon: '⏳', class: 'azimandia',
     difficulty: 'hard', boss: { extraHealth: 10, startArmor: 5, doubleHeroPower: true },
-    intro: 'ФИНАЛЬНЫЙ БОСС. 40 здоровья, 5 брони, двойная сила героя. Удачи.',
+    intro: 'ФИНАЛ. Отражение Азимандии из другой ветви времени: 40 здоровья, 5 брони, двойной Аспект.',
     rewardGold: 500,
-    unlocks: ['tavern_keeper'],
+    unlocks: ['time_loop', 'red_wave', 'herald_ascension'],
+    addCards: ['red_wave', 'star_comet', 'timeless_echo'],
   },
 ];
 
 // Build the enemy deck for an encounter. 'weak' removes the top-end cards so
-// early fights stay beginner-friendly.
+// early fights stay beginner-friendly; addCards splices in boss signatures.
 export function encounterDeck(enc) {
-  const base = STARTER_DECKS[enc.class].slice();
+  let base = STARTER_DECKS[enc.class].slice();
   if (enc.deckMod === 'weak') {
-    // Swap expensive cards for cheap vanilla minions.
-    const cheap = ['wisp', 'murloc_raider', 'river_croc', 'bloodfen_raptor', 'ironfur_grizzly'];
+    const cheap = ['pup_karkh', 'tauro_bull', 'burrower', 'steel_sentinel', 'gremlin_digger'];
+    const expensive = ['drill_walker', 'deep_horror', 'thunder_tauro', 'plains_matriarch',
+      'rune_keeper', 'ascension_banner', 'night_carver', 'elimination', 'word_of_void'];
     let swapIdx = 0;
-    return base.map((id) => {
-      // crude cost check without importing CARDS: known expensive ids
-      const expensive = ['flamestrike', 'war_golem', 'boulderfist_ogre', 'archmage', 'core_hound',
-        'savannah_highmane', 'temple_enforcer', 'lord_of_arena', 'reckless_rocketeer', 'abomination'];
-      if (expensive.includes(id)) return cheap[(swapIdx++) % cheap.length];
-      return id;
-    });
+    base = base.map((id) => expensive.includes(id) ? cheap[(swapIdx++) % cheap.length] : id);
+  }
+  if (enc.addCards) {
+    // Boss signature cards replace the first N cards of the deck.
+    base = [...enc.addCards, ...base.slice(enc.addCards.length)];
   }
   return base;
 }

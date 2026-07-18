@@ -5,29 +5,33 @@
 import { el, buildCardEl } from './cardRender.js';
 import { CLASSES, STARTER_DECKS, DECK_SIZE, MAX_COPIES } from '../data/decks.js';
 import { CAMPAIGN } from '../data/campaign.js';
-import { collectibleForClass, getCard } from '../data/cards.js';
+import { collectibleForClass, getCard, RANKS } from '../data/cards.js';
 import * as Save from '../state/save.js';
+import { Audio } from '../audio/audio.js';
 
 export function renderMenu(root, nav) {
   root.replaceChildren();
+  Audio.setScene('menu');
   const s = Save.load();
   const wrap = el('div', 'menu-screen');
-  wrap.append(el('div', 'game-logo', '🍺'));
-  wrap.append(el('h1', 'game-title', 'Таверна Легенд'));
-  wrap.append(el('div', 'game-subtitle', 'Коллекционная карточная игра'));
+  wrap.append(el('div', 'game-logo', '🌌'));
+  wrap.append(el('h1', 'game-title', 'Звёздная Кровь'));
+  wrap.append(el('div', 'game-subtitle', 'Руны Восхождения — коллекционная карточная игра'));
 
   const stats = el('div', 'menu-stats',
-    `💰 ${s.gold} золота · 🏆 ${s.stats.wins} побед · Кампания: ${s.campaignProgress}/${CAMPAIGN.length}`);
+    `💰 ${s.gold} золота · 🏆 ${s.stats.wins} побед · Восхождение: ${s.campaignProgress}/${CAMPAIGN.length}`);
   wrap.append(stats);
 
   const buttons = el('div', 'menu-buttons');
-  const btnCampaign = el('button', 'btn primary big', '⚔️ Кампания');
+  const btnCampaign = el('button', 'btn primary big', '⚔️ Кампания: Путь Восхождения');
   btnCampaign.addEventListener('click', () => nav.go('campaign'));
-  const btnQuick = el('button', 'btn big', '🎲 Быстрый бой');
+  const btnQuick = el('button', 'btn big', '🎲 Быстрый бой с ИИ');
   btnQuick.addEventListener('click', () => nav.go('quickPick'));
-  const btnCollection = el('button', 'btn big', '🃏 Коллекция и колоды');
+  const btnPvp = el('button', 'btn big', '🤝 PvP на одном экране');
+  btnPvp.addEventListener('click', () => nav.go('pvpPick'));
+  const btnCollection = el('button', 'btn big', '🃏 Коллекция Рун');
   btnCollection.addEventListener('click', () => nav.go('collection'));
-  buttons.append(btnCampaign, btnQuick, btnCollection);
+  buttons.append(btnCampaign, btnQuick, btnPvp, btnCollection);
   wrap.append(buttons);
 
   const reset = el('button', 'btn danger small-btn', 'Сбросить прогресс');
@@ -38,16 +42,17 @@ export function renderMenu(root, nav) {
   root.append(wrap);
 }
 
-// Pick a class before a battle (campaign or quick).
+// Pick an Ascendant before a battle.
 export function renderClassPick(root, nav, onPick, subtitle) {
   root.replaceChildren();
   const wrap = el('div', 'pick-screen');
-  wrap.append(el('h2', 'screen-title', 'Выберите героя'));
+  wrap.append(el('h2', 'screen-title', 'Выберите Восходящего'));
   if (subtitle) wrap.append(el('div', 'screen-sub', subtitle));
   const grid = el('div', 'class-grid');
   for (const [cls, meta] of Object.entries(CLASSES)) {
     const cardBtn = el('div', `class-card theme-${cls}`);
     cardBtn.append(el('div', 'class-icon', meta.icon));
+    cardBtn.append(el('div', 'class-hero-name', meta.hero));
     cardBtn.append(el('div', 'class-name', meta.name));
     cardBtn.append(el('div', 'class-desc', meta.desc));
     const s = Save.load();
@@ -65,8 +70,8 @@ export function renderCampaign(root, nav) {
   root.replaceChildren();
   const s = Save.load();
   const wrap = el('div', 'campaign-screen');
-  wrap.append(el('h2', 'screen-title', '⚔️ Кампания: Путь к славе'));
-  wrap.append(el('div', 'screen-sub', 'Побеждайте противников по очереди. За победы — золото и новые карты.'));
+  wrap.append(el('h2', 'screen-title', '⚔️ Путь Восхождения'));
+  wrap.append(el('div', 'screen-sub', 'Одолейте десятерых — от одичавших варгов до Безвременья. Награда: золото и новые Руны.'));
 
   const path = el('div', 'campaign-path');
   CAMPAIGN.forEach((enc, i) => {
@@ -77,7 +82,7 @@ export function renderCampaign(root, nav) {
     info.append(el('div', 'enc-name', `${i + 1}. ${enc.name}`));
     info.append(el('div', 'enc-class', `${CLASSES[enc.class].icon} ${CLASSES[enc.class].name} · ${diffLabel(enc.difficulty)}${enc.boss ? ' · 👑 БОСС' : ''}`));
     if (state !== 'locked') info.append(el('div', 'enc-intro', enc.intro));
-    info.append(el('div', 'enc-reward', `Награда: 💰${enc.rewardGold} + ${enc.unlocks.length} карт`));
+    info.append(el('div', 'enc-reward', `Награда: 💰${enc.rewardGold} + ${enc.unlocks.length} Рун`));
     node.append(info);
     if (state === 'current') {
       const btn = el('button', 'btn primary', 'В бой!');
@@ -89,8 +94,7 @@ export function renderCampaign(root, nav) {
     path.append(node);
   });
   if (s.campaignProgress >= CAMPAIGN.length) {
-    const doneBanner = el('div', 'campaign-done', '🎉 Кампания пройдена! Вы — легенда таверны!');
-    path.append(doneBanner);
+    path.append(el('div', 'campaign-done', '🎉 Восхождение завершено! Ваше имя вписано в Звёздную Кровь!'));
   }
   wrap.append(path);
   wrap.append(backButton(nav));
@@ -106,11 +110,10 @@ export function renderCollection(root, nav) {
   root.replaceChildren();
   const s = Save.load();
   const wrap = el('div', 'collection-screen');
-  wrap.append(el('h2', 'screen-title', '🃏 Коллекция'));
-  wrap.append(el('div', 'screen-sub', `💰 ${s.gold} золота — открывайте карты за золото и собирайте колоды.`));
+  wrap.append(el('h2', 'screen-title', '🃏 Коллекция Рун'));
+  wrap.append(el('div', 'screen-sub', `💰 ${s.gold} золота — открывайте Руны и собирайте колоды. Ранги: Дерево · Бронза · Серебро · Золото.`));
 
-  // Class tabs.
-  let currentClass = nav.state.collectionClass || 'mage';
+  let currentClass = nav.state.collectionClass || 'vincent';
   const tabs = el('div', 'class-tabs');
   for (const [cls, meta] of Object.entries(CLASSES)) {
     const t = el('button', `tab ${cls === currentClass ? 'active' : ''}`, `${meta.icon} ${meta.name}`);
@@ -119,7 +122,6 @@ export function renderCollection(root, nav) {
   }
   wrap.append(tabs);
 
-  // Deck under construction (persisted in nav.state while navigating).
   const deckKey = 'deck_' + currentClass;
   if (!nav.state[deckKey]) {
     const saved = s.activeDeck && s.activeDeck.class === currentClass
@@ -130,7 +132,6 @@ export function renderCollection(root, nav) {
 
   const layout = el('div', 'collection-layout');
 
-  // Card grid.
   const grid = el('div', 'card-grid');
   const cards = collectibleForClass(currentClass).slice()
     .sort((a, b) => a.cost - b.cost || a.name.localeCompare(b.name));
@@ -144,9 +145,9 @@ export function renderCollection(root, nav) {
     }
     node.addEventListener('click', () => {
       if (!owned) {
-        // Crafting.
-        const cost = Save.CRAFT_COST[c.rarity || 'common'] || 40;
-        if (confirm(`Открыть «${c.name}» за 💰${cost}?`)) {
+        const cost = Save.CRAFT_COST[c.rarity || 'wood'] || 40;
+        const rank = RANKS[c.rarity || 'wood']?.label || 'Дерево';
+        if (confirm(`Открыть «${c.name}» (${rank}) за 💰${cost}?`)) {
           if (Save.spendGold(cost)) { Save.unlockCards([c.id]); renderCollection(root, nav); }
           else alert('Недостаточно золота. Проходите кампанию!');
         }
@@ -161,7 +162,6 @@ export function renderCollection(root, nav) {
   }
   layout.append(grid);
 
-  // Deck list side panel.
   const side = el('div', 'deck-panel');
   side.append(el('div', 'deck-panel-title', `Колода: ${deck.length}/${DECK_SIZE}`));
   const list = el('div', 'deck-list');
@@ -218,7 +218,7 @@ export function renderReward(root, nav, enc) {
     node.classList.add('reward-card');
     cardsRow.append(node);
   }
-  wrap.append(el('div', 'reward-label', 'Новые карты в коллекции:'));
+  wrap.append(el('div', 'reward-label', 'Новые Руны в коллекции:'));
   wrap.append(cardsRow);
   const btn = el('button', 'btn primary big', 'Продолжить');
   btn.addEventListener('click', () => nav.go('campaign'));

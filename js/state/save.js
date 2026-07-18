@@ -4,7 +4,7 @@
 
 import { STARTER_DECKS } from '../data/decks.js';
 
-const KEY = 'tavern-legends-save-v1';
+const KEY = 'star-blood-save-v1';
 
 function starterCollection() {
   // Player starts with every card used in the four starter decks.
@@ -98,8 +98,8 @@ export function battleDeck(cls) {
   return STARTER_DECKS[cls].slice();
 }
 
-// Craft prices per rarity.
-export const CRAFT_COST = { basic: 40, common: 40, rare: 100, epic: 400, legendary: 1600 };
+// Craft prices per rank (Дерево/Бронза/Серебро/Золото).
+export const CRAFT_COST = { wood: 40, bronze: 100, silver: 400, gold: 1600 };
 
 export function resetAll() {
   cache = defaultSave();
