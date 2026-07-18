@@ -410,3 +410,89 @@ h1, h2 { font-weight: normal; }
 .mute-btn:hover { transform: scale(1.1); border-color: var(--gold-bright); }
 
 .handoff-overlay { backdrop-filter: blur(14px); }
+
+/* ---------- VFX: боевые эффекты ---------- */
+.fx-float {
+  position: fixed; z-index: 300; pointer-events: none;
+  transform: translate(-50%, -50%);
+  font-size: 26px; font-weight: bold; font-family: Georgia, serif;
+  text-shadow: 0 2px 6px rgba(0,0,0,.9), 0 0 12px currentColor;
+  animation: fxFloat 1s ease-out forwards;
+}
+.fx-dmg { color: #ff5d7a; }
+.fx-heal { color: #7ee787; }
+.fx-shield-text { color: #ffd76e; font-size: 15px; letter-spacing: 2px; }
+@keyframes fxFloat {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.5); }
+  15% { opacity: 1; transform: translate(-50%, -60%) scale(1.25); }
+  100% { opacity: 0; transform: translate(-50%, -160%) scale(1); }
+}
+
+.fx-particle {
+  position: fixed; z-index: 290; pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: fxParticle .65s ease-out forwards;
+  box-shadow: 0 0 6px currentColor;
+}
+@keyframes fxParticle {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.2); }
+}
+
+.fx-hit { animation: fxHit .4s ease !important; }
+@keyframes fxHit {
+  0%, 100% { filter: none; }
+  30% { filter: brightness(2) saturate(2) drop-shadow(0 0 12px #ff5d7a); transform: scale(.94); }
+}
+.fx-healed { animation: fxHealed .5s ease !important; }
+@keyframes fxHealed {
+  30% { filter: brightness(1.6) drop-shadow(0 0 14px #7ee787); }
+}
+.fx-shield-pop { animation: fxShieldPop .5s ease !important; }
+@keyframes fxShieldPop {
+  30% { filter: brightness(2.2) drop-shadow(0 0 20px #ffd76e); transform: scale(1.12); }
+}
+.fx-summoned { animation: fxSummoned .45s ease backwards !important; }
+@keyframes fxSummoned {
+  0% { opacity: 0; transform: translateY(18px) scale(.6); filter: brightness(2.5); }
+}
+.fx-lunge { animation: fxLunge .32s ease !important; z-index: 60; position: relative; }
+@keyframes fxLunge {
+  45% { transform: translate(var(--lx, 0), var(--ly, -20px)) scale(1.12); }
+}
+
+.fx-shake { animation: fxShake .35s ease; }
+@keyframes fxShake {
+  20% { transform: translate(-5px, 2px); }
+  40% { transform: translate(5px, -2px); }
+  60% { transform: translate(-3px, -2px); }
+  80% { transform: translate(3px, 2px); }
+}
+.fx-shake-strong { animation: fxShakeStrong .45s ease; }
+@keyframes fxShakeStrong {
+  15% { transform: translate(-10px, 4px) rotate(-.4deg); }
+  35% { transform: translate(9px, -5px) rotate(.4deg); }
+  55% { transform: translate(-7px, -3px); }
+  75% { transform: translate(6px, 4px); }
+}
+
+/* Карта в руке: подсветка играбельных */
+.hand-row .card:not(.unplayable) { box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 12px rgba(143,199,255,.28); }
+.hand-row .card:not(.unplayable):hover { box-shadow: 0 16px 34px rgba(0,0,0,.65), 0 0 18px rgba(143,199,255,.5); }
+
+/* ---------- ИИ-арт ---------- */
+.card-art.has-image, .minion-art.has-image {
+  background-size: cover; background-position: center;
+  border-color: rgba(255,215,110,.35);
+}
+.hero-icon.has-image {
+  width: 72px; height: 72px; margin: 0 auto; border-radius: 50%;
+  background-size: cover; background-position: center;
+  border: 2px solid rgba(255,215,110,.5);
+  box-shadow: 0 0 14px rgba(160,120,255,.35);
+}
+.class-icon.has-image {
+  width: 92px; height: 92px; margin: 0 auto; border-radius: 50%;
+  background-size: cover; background-position: center;
+  border: 2px solid rgba(255,215,110,.5);
+}

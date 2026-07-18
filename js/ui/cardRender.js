@@ -2,6 +2,18 @@
 // collection/deck editor. Pure functions: state in, element out.
 
 import { KEYWORDS, RANKS } from '../data/cards.js';
+import { ART } from '../data/art-manifest.js';
+
+// Арт-бокс: ИИ-картинка, если она нарезана, иначе эмодзи на градиенте.
+function applyArt(node, key, emoji) {
+  if (ART.has(key)) {
+    node.classList.add('has-image');
+    node.style.backgroundImage = `url("assets/art/${key}.webp")`;
+    node.textContent = '';
+  } else {
+    node.textContent = emoji || '❔';
+  }
+}
 
 export function el(tag, cls, text) {
   const node = document.createElement(tag);
@@ -22,7 +34,7 @@ export function buildCardEl(card, opts = {}) {
   const cost = el('div', 'card-cost', String(card.cost));
   cost.title = 'Стоимость в Звёздной Крови';
   const art = el('div', 'card-art');
-  art.textContent = card.art || '❔';
+  applyArt(art, card.id, card.art);
   const name = el('div', 'card-name', card.name);
   const text = el('div', 'card-text', card.text || '');
 
@@ -70,7 +82,8 @@ export function buildMinionEl(m, game) {
   if (m.shackled) root.classList.add('is-shackled');
   if (m.keywords.has('stealth') && !m.silenced) root.classList.add('is-stealth');
 
-  const art = el('div', 'minion-art', m.art || '❔');
+  const art = el('div', 'minion-art');
+  applyArt(art, m.cardId, m.art);
   const name = el('div', 'minion-name', m.name);
   const stats = el('div', 'minion-stats');
   const a = el('span', 'minion-attack', String(atk));

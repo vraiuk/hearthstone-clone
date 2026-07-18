@@ -33,6 +33,7 @@ export class Game {
     this.rng = makeRng(config.seed);
     this.log = [];
     this.onLog = config.log || null;
+    this.onEvent = config.onEvent || null;  // VFX hook: {type, target?, amount?}
     this.pendingDeaths = [];
     this.winner = null;
     this.over = false;
@@ -81,6 +82,7 @@ export class Game {
 
   // ---- utility ----
   emit(msg) { this.log.push(msg); if (this.onLog) this.onLog(msg); }
+  fx(event) { if (this.onEvent) this.onEvent(event); }
   enemyOf(id) { return id === 0 ? 1 : 0; }
   pickRandom(arr) { return arr[Math.floor(this.rng() * arr.length)]; }
   shuffle(arr) {
@@ -573,6 +575,7 @@ export class Game {
     const aName = attacker.isHero ? this.players[attacker.playerId].name : attacker.name;
     const tName = target.isHero ? this.players[target.playerId].name : target.name;
     this.emit(`${aName} атакует ${tName}.`);
+    this.fx({ type: 'attack', attacker, target });
 
     // Attacking breaks stealth.
     if (!attacker.isHero && attacker.keywords.has('stealth')) attacker.keywords.delete('stealth');
@@ -630,12 +633,14 @@ export class Game {
       entity.divineShield = false;
       entity.keywords.delete('divineShield');
       this.emit(`Щит «${entity.name}» поглощает урон.`);
+      this.fx({ type: 'shieldPop', target: entity });
       return false;
     }
     if (entity.isHero) {
       if (entity.shieldCharges > 0) {
         entity.shieldCharges -= 1;
         this.emit(`Торк поглощает удар (осталось ${entity.shieldCharges}).`);
+        this.fx({ type: 'shieldPop', target: entity });
         return false;
       }
       let dmg = amount;
@@ -645,9 +650,11 @@ export class Game {
         dmg -= absorbed;
       }
       entity.health -= dmg;
+      this.fx({ type: 'damage', target: entity, amount });
     } else {
       entity.health -= amount;
       this.normalizeMinion(entity);
+      this.fx({ type: 'damage', target: entity, amount });
       if (entity.health <= 0 && !this.pendingDeaths.includes(entity))
         this.pendingDeaths.push(entity);
     }
@@ -662,6 +669,7 @@ export class Game {
     if (healed > 0) {
       const n = entity.isHero ? this.players[entity.playerId].name : entity.name;
       this.emit(`«${n}» восстанавливает ${healed} здоровья.`);
+      this.fx({ type: 'heal', target: entity, amount: healed });
     }
     if (!entity.isHero) this.normalizeMinion(entity);
   }
@@ -762,6 +770,7 @@ export class Game {
         if (idx === -1) continue;
         p.board.splice(idx, 1);
         this.emit(`«${m.name}» уничтожен.`);
+        this.fx({ type: 'death', target: m });
         // Слава: the opposing Ascendant claims the kill.
         this.players[this.enemyOf(m.owner)].glory += 1;
         if (m.deathrattle && !m.silenced) {

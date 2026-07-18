@@ -8,6 +8,7 @@ import { CAMPAIGN } from '../data/campaign.js';
 import { collectibleForClass, getCard, RANKS } from '../data/cards.js';
 import * as Save from '../state/save.js';
 import { Audio } from '../audio/audio.js';
+import { ART } from '../data/art-manifest.js';
 
 export function renderMenu(root, nav) {
   root.replaceChildren();
@@ -51,7 +52,14 @@ export function renderClassPick(root, nav, onPick, subtitle) {
   const grid = el('div', 'class-grid');
   for (const [cls, meta] of Object.entries(CLASSES)) {
     const cardBtn = el('div', `class-card theme-${cls}`);
-    cardBtn.append(el('div', 'class-icon', meta.icon));
+    const iconEl = el('div', 'class-icon');
+    if (ART.has('hero_' + cls)) {
+      iconEl.classList.add('has-image');
+      iconEl.style.backgroundImage = `url("assets/art/hero_${cls}.webp")`;
+    } else {
+      iconEl.textContent = meta.icon;
+    }
+    cardBtn.append(iconEl);
     cardBtn.append(el('div', 'class-hero-name', meta.hero));
     cardBtn.append(el('div', 'class-name', meta.name));
     cardBtn.append(el('div', 'class-desc', meta.desc));

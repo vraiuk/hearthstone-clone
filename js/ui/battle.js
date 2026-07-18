@@ -7,6 +7,8 @@ import { AI } from '../ai/ai.js';
 import { buildCardEl, buildMinionEl, el } from './cardRender.js';
 import { CLASSES } from '../data/decks.js';
 import { Audio } from '../audio/audio.js';
+import { VFX } from './vfx.js';
+import { ART } from '../data/art-manifest.js';
 
 const AI_STEP_MS = 650;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -38,7 +40,15 @@ export class BattleScreen {
         { name: opts.enemy.name, hero: opts.enemy.class, deck: opts.enemy.deck },
       ];
 
-    this.game = new Game({ players, log: (msg) => this.pushLog(msg) });
+    this.vfx = new VFX(opts.root, () => this.pid);
+    this.game = new Game({
+      players,
+      log: (msg) => this.pushLog(msg),
+      onEvent: (ev) => {
+        this.vfx.push(ev);
+        if (ev.type === 'damage') Audio.sfx('damage');
+      },
+    });
     this.ai = this.mode === 'ai' ? new AI(opts.enemy.difficulty || 'normal') : null;
 
     // Boss modifiers (campaign only).
@@ -99,6 +109,8 @@ export class BattleScreen {
 
     this.root.append(board);
     this.updateSelectability();
+    // Проигрываем накопленные эффекты поверх свежего DOM.
+    this.vfx.flush();
 
     if (this.awaitHandoff) this.showHandoff();
     // Re-append the end screen on every render while the game is over —
@@ -113,8 +125,15 @@ export class BattleScreen {
 
     const portrait = el('div', `hero-portrait theme-${p.heroClass}`);
     portrait.dataset.hero = side;
-    const icon = (this.mode === 'ai' && side === 'enemy' && this.opts.enemy.icon) || cls.icon;
-    portrait.append(el('div', 'hero-icon', icon));
+    const iconEl = el('div', 'hero-icon');
+    const artKey = 'hero_' + p.heroClass;
+    if (ART.has(artKey)) {
+      iconEl.classList.add('has-image');
+      iconEl.style.backgroundImage = `url("assets/art/${artKey}.webp")`;
+    } else {
+      iconEl.textContent = (this.mode === 'ai' && side === 'enemy' && this.opts.enemy.icon) || cls.icon;
+    }
+    portrait.append(iconEl);
     portrait.append(el('div', 'hero-name', p.name));
     portrait.append(el('div', 'hero-class-tag', cls.name));
     const hp = el('div', 'hero-health', String(Math.max(0, p.hero.health)));
@@ -440,7 +459,11 @@ export class BattleScreen {
   showEndScreen() {
     const firstTime = !this.finished;
     this.finished = true;
-    if (firstTime) Audio.setScene('menu');
+    if (firstTime) {
+      Audio.setScene('menu');
+      const playerWon = this.mode === 'hotseat' ? this.game.winner !== -1 : this.game.winner === 0;
+      if (playerWon) this.vfx.celebrate();
+    }
     const overlay = el('div', 'end-overlay');
     const panel = el('div', 'end-panel');
     if (this.mode === 'hotseat') {
