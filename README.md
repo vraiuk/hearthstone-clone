@@ -3,7 +3,7 @@
 Браузерная коллекционная карточная игра в оригинальном сеттинге «Звёздной Крови».
 Чистый HTML/CSS/JS без зависимостей и сборки — открой `index.html` и играй.
 
-**▶️ Играть: https://vraiuk.github.io/hearthstone-clone/**
+**▶️ Играть: https://vraiuk.github.io/star-blood/**
 
 ![genre](https://img.shields.io/badge/genre-CCG-orange) ![deps](https://img.shields.io/badge/dependencies-0-brightgreen) ![lang](https://img.shields.io/badge/lang-RU-blue)
 
