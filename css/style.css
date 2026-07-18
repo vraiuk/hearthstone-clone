@@ -26,6 +26,10 @@
   --hairline: 1px solid rgba(255,255,255,.08);
   --border-accent: 2px solid #56508f;
 
+  /* Типографика: display-serif для мира, sans для интерфейса */
+  --font-display: 'Cormorant', Georgia, serif;
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+
   /* Пропорции карты 5:7 (63×88 мм классической ККИ) */
   --card-w: 132px;
   --card-h: 184px;
@@ -44,7 +48,7 @@ body {
     radial-gradient(1px 1px at 30% 10%, rgba(255,255,255,.4) 50%, transparent 51%),
     var(--bg);
   color: var(--text);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-body);
   min-height: 100vh;
   user-select: none;
 }
@@ -783,4 +787,55 @@ button:focus-visible, .card:focus-visible, .minion:focus-visible {
   width: 220px; height: 130px; margin: 0 auto 16px; border-radius: var(--r-md);
   background-size: cover; background-position: center 30%;
   border: 1px solid rgba(255,215,110,.4);
+}
+
+/* ---------- Типографика: Cormorant (мир) + Manrope (интерфейс) ---------- */
+.game-title, .screen-title, .end-title, .turn-banner,
+.card-name, .minion-name, .hero-name, .class-hero-name, .class-name,
+.enc-name, .deck-panel-title, .opp-card-label, .campaign-done {
+  font-family: var(--font-display);
+}
+.game-title { font-weight: 700; letter-spacing: 3px; }
+.screen-title { font-weight: 600; letter-spacing: 1px; }
+.card-name { font-weight: 700; font-size: 13px; letter-spacing: .2px; }
+.minion-name { font-weight: 600; font-size: 11px; }
+.hero-name { font-weight: 700; font-size: 15px; }
+.class-hero-name { font-weight: 700; font-size: 17px; }
+.enc-name { font-weight: 600; font-size: 20px; }
+.turn-banner { font-weight: 700; }
+.end-title { font-weight: 700; }
+.btn, .tab, .end-turn-btn { font-family: var(--font-body); font-weight: 600; }
+.card-text, .log-line, .screen-sub, .enc-intro, .class-desc { font-family: var(--font-body); }
+.card-cost, .card-attack, .card-health, .minion-attack, .minion-health,
+.hero-health, .hero-attack, .mana-text, .glory-info, .deck-info {
+  font-family: var(--font-body); font-weight: 700;
+}
+.fx-float { font-family: var(--font-body); font-weight: 800; }
+
+/* ---------- SVG-иконки инфографики ---------- */
+.ico { display: inline-flex; vertical-align: -3px; width: 16px; height: 16px; margin-right: 4px; }
+.ico svg { width: 100%; height: 100%; }
+.ico-mana { color: #ff5d7a; filter: drop-shadow(0 0 4px rgba(255,93,122,.6)); }
+.ico-glory { color: var(--gold-bright); filter: drop-shadow(0 0 4px rgba(255,215,110,.5)); }
+.hero-armor .ico { color: #9fb6d8; width: 14px; height: 14px; margin-right: 2px; }
+.hero-attack .ico { color: #ffe3a3; width: 14px; height: 14px; margin-right: 2px; }
+.deck-info .ico { color: var(--text-dim); width: 18px; height: 18px; }
+.hand-count .ico { color: var(--text-dim); width: 18px; height: 18px; margin-left: 6px; }
+.glory-info { display: inline-flex; align-items: center; font-size: 15px; color: var(--gold-bright); }
+.mana-text { display: inline-flex; align-items: center; }
+.hero-armor { display: inline-flex; align-items: center; font-size: 12px; margin-left: 3px; color: #cfe0f5; }
+.hero-attack { display: flex; align-items: center; justify-content: center; }
+.deck-info { display: inline-flex; align-items: center; gap: 2px; }
+
+/* Мана-кристаллы → капли крови */
+.crystal {
+  width: 12px; height: 12px;
+  border-radius: 0 50% 50% 50%;
+  transform: rotate(45deg);
+  background: #33172a; border: 1px solid #6d2c47;
+}
+.crystal.full {
+  background: radial-gradient(circle at 35% 35%, #ff8fa8, #a01238);
+  border-color: #ffb1c1;
+  box-shadow: 0 0 7px rgba(255,93,122,.75);
 }

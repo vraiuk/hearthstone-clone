@@ -8,6 +8,7 @@ import { buildCardEl, buildMinionEl, el } from './cardRender.js';
 import { CLASSES } from '../data/decks.js';
 import { Audio } from '../audio/audio.js';
 import { VFX, ringBurst, flyCard } from './vfx.js';
+import { svgIcon } from './icons.js';
 import { ART } from '../data/art-manifest.js';
 import { DragController } from './drag.js';
 
@@ -262,9 +263,17 @@ export class BattleScreen {
     portrait.append(el('div', 'hero-name', p.name));
     portrait.append(el('div', 'hero-class-tag', cls.name));
     const hp = el('div', 'hero-health', String(Math.max(0, p.hero.health)));
-    if (p.hero.armor > 0) hp.append(el('span', 'hero-armor', '🛡' + p.hero.armor));
+    if (p.hero.armor > 0) {
+      const arm = el('span', 'hero-armor', String(p.hero.armor));
+      arm.prepend(svgIcon('shield'));
+      hp.append(arm);
+    }
     portrait.append(hp);
-    if (p.hero.attack > 0) portrait.append(el('div', 'hero-attack', '⚔' + p.hero.attack));
+    if (p.hero.attack > 0) {
+      const atk = el('div', 'hero-attack', String(p.hero.attack));
+      atk.prepend(svgIcon('sword'));
+      portrait.append(atk);
+    }
     if (p.weapon) {
       const wTags = [];
       if (p.weapon.poisonous) wTags.push('☠️');
@@ -284,7 +293,9 @@ export class BattleScreen {
 
     // Звёздная Кровь (мана).
     const mana = el('div', 'mana-bar');
-    mana.append(el('span', 'mana-text', `🩸 ${p.mana}/${p.maxMana}`));
+    const manaText = el('span', 'mana-text', `${p.mana}/${p.maxMana}`);
+    manaText.prepend(svgIcon('drop', 'ico-mana'));
+    mana.append(manaText);
     const crystals = el('span', 'mana-crystals');
     for (let i = 0; i < p.maxMana; i++) {
       const c = el('span', 'crystal');
@@ -299,11 +310,16 @@ export class BattleScreen {
       back.style.backgroundImage = 'url("assets/art/card_back.webp")';
       deckInfo.append(back);
     } else {
-      deckInfo.append(document.createTextNode('🂠 '));
+      deckInfo.append(svgIcon('deck'));
     }
     deckInfo.append(el('span', 'deck-count', String(p.deck.length)));
-    if (side === 'enemy') deckInfo.append(el('span', 'hand-count', ` ✋ ${p.hand.length}`));
-    const glory = el('div', 'glory-info', `⭐ ${p.glory}`);
+    if (side === 'enemy') {
+      const hc = el('span', 'hand-count', String(p.hand.length));
+      hc.prepend(svgIcon('hand'));
+      deckInfo.append(hc);
+    }
+    const glory = el('div', 'glory-info', String(p.glory));
+    glory.prepend(svgIcon('star', 'ico-glory'));
     glory.title = 'Слава: копится за убийства существ врага, открывает Титульные карты';
 
     row.append(portrait, powerBtn, mana, glory, deckInfo);
