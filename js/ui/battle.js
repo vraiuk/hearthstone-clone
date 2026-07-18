@@ -68,6 +68,12 @@ export class BattleScreen {
       if (boss.extraHealth) { hero.maxHealth += boss.extraHealth; hero.health += boss.extraHealth; }
       if (boss.startArmor) hero.armor += boss.startArmor;
     }
+    // Ранние противники слабее: стартуют с меньшим запасом здоровья.
+    if (this.mode === 'ai' && opts.enemy.startHealth) {
+      const hero = this.game.players[1].hero;
+      hero.maxHealth = opts.enemy.startHealth;
+      hero.health = opts.enemy.startHealth;
+    }
     this.game.start(0);
     if (boss && boss.openingBoard) {
       for (const tok of boss.openingBoard) {

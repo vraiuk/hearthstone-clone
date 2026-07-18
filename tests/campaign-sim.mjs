@@ -67,6 +67,11 @@ async function playGame(encIdx, playerCls, seed) {
     if (boss.extraHealth) { hero.maxHealth += boss.extraHealth; hero.health += boss.extraHealth; }
     if (boss.startArmor) hero.armor += boss.startArmor;
   }
+  if (enc.enemyHealth) {
+    const hero = game.players[1].hero;
+    hero.maxHealth = enc.enemyHealth;
+    hero.health = enc.enemyHealth;
+  }
   game.start(0);
   if (boss && boss.openingBoard) {
     for (const tok of boss.openingBoard) {

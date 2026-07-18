@@ -41,6 +41,7 @@ const nav = {
           deck: encounterDeck(enc),
           difficulty: enc.difficulty,
           boss: enc.boss || null,
+          startHealth: enc.enemyHealth || null,
         },
         onFinish(won) {
           Save.recordResult(won);
