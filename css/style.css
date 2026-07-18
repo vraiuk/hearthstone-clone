@@ -594,3 +594,56 @@ h1, h2 { font-weight: normal; }
   .end-turn-btn { width: 72px; height: 72px; font-size: 12px; }
   .turn-banner { font-size: 26px; padding: 12px 34px; }
 }
+
+/* ---------- Читаемость боя ---------- */
+.fx-trail {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  z-index: 295; pointer-events: none;
+  filter: drop-shadow(0 0 6px rgba(255,32,80,.5));
+  animation: trailFade .55s ease forwards;
+}
+@keyframes trailFade { 60% { opacity: 1; } 100% { opacity: 0; } }
+
+.fx-skull { font-size: 22px; animation-duration: 1.1s; }
+
+.opp-card-preview {
+  position: fixed; left: 50%; top: 44%; transform: translate(-50%, -50%);
+  z-index: 330; pointer-events: none; text-align: center;
+  animation: oppCardIn .3s ease;
+  transition: opacity .3s;
+}
+.opp-card-preview.fade { opacity: 0; }
+.opp-card-preview .card {
+  transform: scale(1.7); transform-origin: top center; margin-top: 14px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.8), 0 0 40px rgba(255,93,122,.35);
+}
+.opp-card-label {
+  color: var(--gold-bright); font-size: 15px; letter-spacing: 1px;
+  background: rgba(10,6,20,.85); border: 1px solid var(--gold);
+  border-radius: 16px; padding: 5px 18px; display: inline-block;
+}
+@keyframes oppCardIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
+}
+
+.power-banner {
+  position: fixed; left: 50%; top: 24%; transform: translateX(-50%);
+  z-index: 330; pointer-events: none;
+  color: var(--text); font-size: 22px;
+  background: linear-gradient(180deg, #3b3566, #232043);
+  border: 2px solid #56508f; border-radius: 14px; padding: 12px 30px;
+  box-shadow: 0 0 34px rgba(86,80,143,.6);
+  animation: bannerSweep 1.6s ease forwards;
+}
+
+/* ---------- Доступность (по чек-листу ui-ux-pro-max) ---------- */
+:root { --text-dim: #a9a3cc; } /* контраст диммед-текста повышен */
+button:focus-visible, .card:focus-visible, .minion:focus-visible {
+  outline: 2px solid var(--gold-bright); outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-shake, .fx-shake-strong, .fx-lunge { animation: none !important; }
+  .turn-banner, .power-banner { animation-duration: .8s; }
+  .game-logo { animation: none; }
+  .card, .minion, .btn { transition: none; }
+}

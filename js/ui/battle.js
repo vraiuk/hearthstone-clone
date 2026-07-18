@@ -46,6 +46,15 @@ export class BattleScreen {
       players,
       log: (msg) => this.pushLog(msg),
       onEvent: (ev) => {
+        // Действия противника показываем крупно — понятно, что он сыграл.
+        if (ev.type === 'cardPlayed') {
+          if (ev.casterId !== this.pid) this.showOpponentCard(ev.card);
+          return;
+        }
+        if (ev.type === 'heroPower') {
+          if (ev.casterId !== this.pid) this.showPowerBanner(ev.power);
+          return;
+        }
         this.vfx.push(ev);
         if (ev.type === 'damage') Audio.sfx('damage');
       },
@@ -173,10 +182,28 @@ export class BattleScreen {
     }
   }
 
+  // Крупный показ карты, разыгранной противником (~1.5 с).
+  showOpponentCard(card) {
+    document.querySelectorAll('.opp-card-preview').forEach((n) => n.remove());
+    const wrap = el('div', 'opp-card-preview');
+    wrap.append(el('div', 'opp-card-label', 'Противник разыгрывает'));
+    wrap.append(buildCardEl(card, {}));
+    document.body.append(wrap);
+    setTimeout(() => { wrap.classList.add('fade'); setTimeout(() => wrap.remove(), 300); }, 1500);
+  }
+
+  showPowerBanner(power) {
+    const b = el('div', 'power-banner', `${power.icon} Аспект: ${power.name}`);
+    document.body.append(b);
+    setTimeout(() => b.remove(), 1600);
+  }
+
   // ---------- rendering ----------
   render() {
     const g = this.game;
     const me = g.players[this.pid], foe = g.players[this.foePid];
+    // Снимок позиций ДО перерисовки — эффекты гибели лягут точно на место.
+    this.vfx.snapshotPositions(this.pid);
     this.root.replaceChildren();
 
     const board = el('div', 'battle');

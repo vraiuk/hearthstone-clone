@@ -16,9 +16,8 @@ function centerOf(node) {
   return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
 }
 
-// Всплывающее число (урон/лечение) над целью.
-function floatNumber(node, text, cls) {
-  const { x, y } = centerOf(node);
+// Всплывающий текст в точке экрана.
+function floatAt(x, y, text, cls) {
   const el = document.createElement('div');
   el.className = `fx-float ${cls}`;
   el.textContent = text;
@@ -26,6 +25,24 @@ function floatNumber(node, text, cls) {
   el.style.top = y + 'px';
   document.body.append(el);
   setTimeout(() => el.remove(), 1100);
+}
+
+// Всплывающее число (урон/лечение) над целью.
+function floatNumber(node, text, cls) {
+  const { x, y } = centerOf(node);
+  floatAt(x, y, text, cls);
+}
+
+// Гаснущая дуга атаки «кто → кого» — считывается направление удара.
+function attackTrail(from, to) {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'fx-trail');
+  const mx = (from.x + to.x) / 2;
+  const my = Math.min(from.y, to.y) - 40 - Math.abs(to.x - from.x) * 0.06;
+  svg.innerHTML = `<path d="M ${from.x} ${from.y} Q ${mx} ${my} ${to.x} ${to.y}"
+    fill="none" stroke="#ff2050" stroke-width="5" stroke-linecap="round" opacity=".85"/>`;
+  document.body.append(svg);
+  setTimeout(() => svg.remove(), 550);
 }
 
 // Вспышка на цели (удар / щит).
@@ -70,6 +87,30 @@ export class VFX {
     this.root = root;
     this.getPid = getPid;
     this.queue = [];
+    // Позиции сущностей на момент ПРОШЛОГО рендера: эффекты смерти и урона
+    // играют точно на месте, даже если DOM-нода уже удалена.
+    this.lastPositions = new Map();
+  }
+
+  // Снимок позиций перед перерисовкой (вызывает BattleScreen.render()).
+  snapshotPositions(pid) {
+    const map = new Map();
+    this.root.querySelectorAll('.minion[data-instance-id]').forEach((n) => {
+      map.set('m' + n.dataset.instanceId, centerOf(n));
+    });
+    const fr = this.root.querySelector('.hero-portrait[data-hero="friendly"]');
+    const en = this.root.querySelector('.hero-portrait[data-hero="enemy"]');
+    if (fr) map.set('h' + pid, centerOf(fr));
+    if (en) map.set('h' + (pid === 0 ? 1 : 0), centerOf(en));
+    if (map.size) this.lastPositions = map;
+  }
+
+  // Позиция сущности: живая нода или последняя известная точка.
+  posFor(entity, pid) {
+    const node = nodeFor(this.root, entity, pid);
+    if (node) return centerOf(node);
+    const key = entity.isHero ? 'h' + entity.playerId : 'm' + entity.instanceId;
+    return this.lastPositions.get(key) || null;
   }
 
   push(event) { this.queue.push(event); }
@@ -93,11 +134,11 @@ export class VFX {
     switch (ev.type) {
       case 'damage': {
         const node = nodeFor(root, ev.target, pid);
-        if (!node) return;
-        floatNumber(node, `−${ev.amount}`, 'fx-dmg');
-        flash(node, 'fx-hit');
-        const { x, y } = centerOf(node);
-        burst(x, y, { count: 8, colors: ['#ff5d7a', '#ffb1c1', '#c0392b'], size: 5, dist: 40 });
+        const pos = this.posFor(ev.target, pid);
+        if (!pos) return;
+        floatAt(pos.x, pos.y, `−${ev.amount}`, 'fx-dmg');
+        if (node) flash(node, 'fx-hit');
+        burst(pos.x, pos.y, { count: 8, colors: ['#ff5d7a', '#ffb1c1', '#c0392b'], size: 5, dist: 40 });
         if (ev.amount >= 5) shake(root, ev.amount >= 8);
         break;
       }
@@ -111,13 +152,11 @@ export class VFX {
         break;
       }
       case 'death': {
-        // Нода уже удалена рендером — рисуем взрыв по последней позиции не выйдет,
-        // поэтому взрываемся в центре соответствующего ряда.
-        const side = ev.target.owner === pid ? 'friendly' : 'enemy';
-        const row = root.querySelector(`.board-${side}`);
-        if (!row) return;
-        const { x, y } = centerOf(row);
-        burst(x, y, { count: 14, colors: ['#9a93bd', '#56508f', '#2c2950'], size: 7, dist: 70, dur: 750, shape: 'square' });
+        // Точное место гибели — из снапшота позиций прошлого рендера.
+        const pos = this.posFor(ev.target, pid);
+        if (!pos) return;
+        burst(pos.x, pos.y, { count: 14, colors: ['#9a93bd', '#56508f', '#2c2950'], size: 7, dist: 70, dur: 750, shape: 'square' });
+        floatAt(pos.x, pos.y, '💀', 'fx-skull');
         break;
       }
       case 'shieldPop': {
@@ -130,14 +169,21 @@ export class VFX {
         break;
       }
       case 'attack': {
+        const from = this.posFor(ev.attacker, pid);
+        const to = this.posFor(ev.target, pid);
+        if (!from || !to) return;
         const a = nodeFor(root, ev.attacker, pid);
-        const t = nodeFor(root, ev.target, pid);
-        if (a && t) {
-          const from = centerOf(a), to = centerOf(t);
+        if (a) {
           a.style.setProperty('--lx', (to.x - from.x) * 0.35 + 'px');
           a.style.setProperty('--ly', (to.y - from.y) * 0.35 + 'px');
           flash(a, 'fx-lunge');
         }
+        // След удара: гаснущая алая дуга «кто → кого».
+        attackTrail(from, to);
+        // Искры в точке контакта чуть позже выпада.
+        setTimeout(() => {
+          burst(to.x, to.y, { count: 10, colors: ['#ffd76e', '#ff5d7a', '#fff'], size: 4, dist: 34, dur: 450 });
+        }, 140);
         break;
       }
       case 'summon': {

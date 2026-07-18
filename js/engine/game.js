@@ -407,6 +407,7 @@ export class Game {
     p.hand.splice(idx, 1);
     p.mana -= card.cost;
     if (card.gloryCost) p.glory -= card.gloryCost;
+    this.fx({ type: 'cardPlayed', card, casterId: playerId });
 
     const ctx = { casterId: playerId, chosen };
 
@@ -510,6 +511,7 @@ export class Game {
     p.mana -= hp.cost ?? 2;
     p.heroPowerUsed = true;
     this.emit(`${p.name}: ${hp.name}.`);
+    this.fx({ type: 'heroPower', power: hp, casterId: playerId });
     const ctx = { casterId: playerId, chosen };
     resolveOps(this, hp.ops, ctx, { isSpell: false });
     this.processDeaths();
