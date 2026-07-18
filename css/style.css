@@ -26,6 +26,11 @@
   --hairline: 1px solid rgba(255,255,255,.08);
   --border-accent: 2px solid #56508f;
 
+  /* Семантические акценты: фиолет — выбор/магия, золото — действие/награда,
+     багрянец — мана/урон/цели, лёд — только заморозка */
+  --violet: #b44df0;
+  --violet-glow: rgba(180,77,240,.55);
+
   /* Типографика: display-serif для мира, sans для интерфейса */
   --font-display: 'Alegreya', Georgia, serif;
   --font-body: 'Manrope', 'Segoe UI', sans-serif;
@@ -60,7 +65,7 @@ body {
   font-family: inherit;
   background: linear-gradient(180deg, var(--wood-light), var(--wood));
   color: var(--text);
-  border: 2px solid #4a4380;
+  border: 2px solid #3b3566;
   border-radius: 10px;
   padding: 11px 24px;
   font-size: var(--fs-md);
@@ -96,7 +101,7 @@ h1, h2 { font-weight: normal; }
   letter-spacing: 2px; margin-top: 6px;
 }
 .game-subtitle { color: var(--text-dim); font-size: 17px; margin: 4px 0 14px; font-style: italic; }
-.menu-stats { background: rgba(0,0,0,.35); border: 1px solid #423c72; border-radius: 20px; padding: 8px 22px; margin-bottom: 26px; font-size: 15px; }
+.menu-stats { background: rgba(0,0,0,.35); border: var(--hairline); border-radius: 20px; padding: 8px 22px; margin-bottom: 26px; font-size: 15px; }
 .menu-buttons { display: flex; flex-direction: column; gap: 14px; width: 320px; }
 
 /* ---------- class pick ---------- */
@@ -105,7 +110,7 @@ h1, h2 { font-weight: normal; }
 .class-card {
   width: 200px; padding: 22px 16px; border-radius: 14px; cursor: pointer;
   background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.28)), var(--wood);
-  border: 2px solid #4a4380;
+  border: 2px solid #3b3566;
   transition: transform .15s, box-shadow .15s, border-color .15s;
 }
 .class-card:hover { transform: translateY(-6px) scale(1.03); border-color: var(--gold-bright); box-shadow: 0 12px 30px rgba(0,0,0,.5); }
@@ -149,7 +154,7 @@ h1, h2 { font-weight: normal; }
 .card.unplayable { filter: saturate(.45) brightness(.75); }
 .card.locked { filter: grayscale(.9) brightness(.6); }
 .card.in-deck { border-color: var(--gold-bright); }
-.card.is-selected { border-color: #7ee787; box-shadow: 0 0 18px rgba(126,231,135,.6); transform: translateY(-10px); }
+.card.is-selected { border-color: var(--violet); box-shadow: 0 0 18px var(--violet-glow); transform: translateY(-10px); }
 
 .card-cost {
   position: absolute; top: -8px; left: -8px; width: 32px; height: 32px;
@@ -214,7 +219,7 @@ h1, h2 { font-weight: normal; }
   transition: border-color .15s, box-shadow .15s;
 }
 .hero-portrait.is-target { border-color: #ff5b4d; box-shadow: 0 0 20px rgba(255,91,77,.55); }
-.hero-portrait.is-selected { border-color: #7ee787; box-shadow: 0 0 20px rgba(126,231,135,.55); }
+.hero-portrait.is-selected { border-color: var(--violet); box-shadow: 0 0 20px var(--violet-glow); }
 .hero-portrait.is-frozen { border-color: #7ec8ff; box-shadow: 0 0 18px rgba(126,200,255,.5); }
 .hero-icon { font-size: 40px; }
 .hero-name { font-size: 13px; color: var(--gold-bright); margin: 3px 0; }
@@ -239,13 +244,13 @@ h1, h2 { font-weight: normal; }
 .hero-power {
   width: 52px; height: 52px; border-radius: 50%; font-size: 24px;
   display: flex; align-items: center; justify-content: center; cursor: pointer;
-  background: radial-gradient(circle at 35% 30%, #4a6f9e, #1d3a5f);
-  border: 3px solid #86b3e8;
+  background: radial-gradient(circle at 35% 30%, #4a3f7e, #241e4a);
+  border: 3px solid #7a71c4;
   transition: transform .12s, filter .12s, box-shadow .12s;
 }
 .hero-power:hover:not(.used) { transform: scale(1.1); }
 .hero-power.used { filter: grayscale(.8) brightness(.6); cursor: default; }
-.hero-power.is-selected { box-shadow: 0 0 18px rgba(126,231,135,.7); border-color: #7ee787; }
+.hero-power.is-selected { box-shadow: 0 0 18px var(--violet-glow); border-color: var(--violet); }
 
 .mana-bar { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 120px; }
 .mana-text { font-size: 15px; color: #ff8fa8; font-weight: bold; }
@@ -277,7 +282,7 @@ h1, h2 { font-weight: normal; }
 .minion.is-frozen { border-color: #7ec8ff; box-shadow: 0 0 14px rgba(126,200,255,.55); filter: saturate(.6) brightness(1.05); }
 .minion.is-silenced { filter: grayscale(.5); }
 .minion.is-target { border-color: #ff5b4d; box-shadow: 0 0 16px rgba(255,91,77,.6); }
-.minion.is-selected { border-color: #7ee787; box-shadow: 0 0 16px rgba(126,231,135,.6); transform: translateY(-6px); }
+.minion.is-selected { border-color: var(--violet); box-shadow: 0 0 16px var(--violet-glow); transform: translateY(-6px); }
 .minion.attacking { animation: lunge .3s ease; }
 @keyframes lunge { 40% { transform: translateY(-16px) scale(1.12); } }
 
@@ -359,7 +364,7 @@ h1, h2 { font-weight: normal; }
 .card-grid { display: flex; flex-wrap: wrap; gap: var(--sp-4) var(--sp-3); flex: 1; justify-content: center; padding-top: var(--sp-3); }
 .deck-panel {
   width: 230px; flex-shrink: 0; position: sticky; top: 10px;
-  background: rgba(0,0,0,.3); border: 1px solid #423c72; border-radius: 12px; padding: 12px;
+  background: rgba(0,0,0,.3); border: var(--hairline); border-radius: 12px; padding: 12px;
   display: flex; flex-direction: column; gap: 8px;
 }
 .deck-panel-title { color: var(--gold-bright); font-size: 16px; text-align: center; }
@@ -423,12 +428,12 @@ h1, h2 { font-weight: normal; }
   pointer-events: none;
 }
 .minion.is-shackled { filter: saturate(.5); }
-.minion-attack.buffed { background: radial-gradient(circle at 35% 30%, #7ee787, #1d7a34); border-color: #c2f5c8; }
+.minion-attack.buffed { background: radial-gradient(circle at 35% 30%, #d78ef0, #6a1d9e); border-color: #e2a9ff; }
 
 .mute-btn {
   position: fixed; right: 14px; bottom: 14px; z-index: 200;
   width: 46px; height: 46px; border-radius: 50%; font-size: 20px; cursor: pointer;
-  background: rgba(25,20,50,.9); border: 2px solid #4a4380; color: #fff;
+  background: rgba(25,20,50,.9); border: 2px solid #3b3566; color: #fff;
   transition: transform .12s, border-color .12s;
 }
 .mute-btn:hover { transform: scale(1.1); border-color: var(--gold-bright); }
@@ -444,7 +449,7 @@ h1, h2 { font-weight: normal; }
   animation: fxFloat 1s ease-out forwards;
 }
 .fx-dmg { color: #ff5d7a; }
-.fx-heal { color: #7ee787; }
+.fx-heal { color: #ffe9ad; }
 .fx-shield-text { color: #ffd76e; font-size: 15px; letter-spacing: 2px; }
 @keyframes fxFloat {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(.5); }
@@ -470,7 +475,7 @@ h1, h2 { font-weight: normal; }
 }
 .fx-healed { animation: fxHealed .5s ease !important; }
 @keyframes fxHealed {
-  30% { filter: brightness(1.6) drop-shadow(0 0 14px #7ee787); }
+  30% { filter: brightness(1.6) drop-shadow(0 0 14px #ffd76e); }
 }
 .fx-shield-pop { animation: fxShieldPop .5s ease !important; }
 @keyframes fxShieldPop {
@@ -501,8 +506,8 @@ h1, h2 { font-weight: normal; }
 }
 
 /* Карта в руке: подсветка играбельных */
-.hand-row .card:not(.unplayable) { box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 12px rgba(143,199,255,.28); }
-.hand-row .card:not(.unplayable):hover { box-shadow: 0 16px 34px rgba(0,0,0,.65), 0 0 18px rgba(143,199,255,.5); }
+.hand-row .card:not(.unplayable) { box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 12px rgba(180,77,240,.3); }
+.hand-row .card:not(.unplayable):hover { box-shadow: 0 16px 34px rgba(0,0,0,.65), 0 0 18px rgba(180,77,240,.5); }
 
 /* ---------- ИИ-арт ---------- */
 .card-art.has-image, .minion-art.has-image {
@@ -538,18 +543,18 @@ h1, h2 { font-weight: normal; }
   position: fixed; z-index: 340; pointer-events: none;
   transform: translate(-50%, -55%) rotate(3deg) scale(1.06);
   opacity: .92;
-  box-shadow: 0 24px 48px rgba(0,0,0,.7), 0 0 24px rgba(143,199,255,.4) !important;
+  box-shadow: 0 24px 48px rgba(0,0,0,.7), 0 0 24px rgba(180,77,240,.4) !important;
   transition: none !important;
 }
 .drag-source { opacity: .25; }
 
 .board-friendly.drop-zone {
-  border-color: rgba(126,231,135,.5);
-  box-shadow: inset 0 0 30px rgba(126,231,135,.12);
+  border-color: rgba(255,215,110,.45);
+  box-shadow: inset 0 0 30px rgba(255,215,110,.1);
 }
 .board-friendly.drop-hover {
-  border-color: #7ee787;
-  box-shadow: inset 0 0 46px rgba(126,231,135,.28);
+  border-color: var(--gold-bright);
+  box-shadow: inset 0 0 46px rgba(255,215,110,.22);
 }
 .target-hover { transform: scale(1.1) !important; filter: brightness(1.35); }
 
@@ -750,14 +755,14 @@ button:focus-visible, .card:focus-visible, .minion:focus-visible {
 
 /* Дыхание играбельных карт и готового Аспекта */
 @keyframes readyPulse {
-  0%, 100% { box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 10px rgba(143,199,255,.22); }
-  50% { box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 20px rgba(143,199,255,.5); }
+  0%, 100% { box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 10px rgba(180,77,240,.25); }
+  50% { box-shadow: 0 4px 10px rgba(0,0,0,.5), 0 0 20px rgba(180,77,240,.55); }
 }
 .hand-row .card:not(.unplayable) { animation: readyPulse 2.2s ease-in-out infinite; }
 .hand-row .card:not(.unplayable):hover { animation: none; }
 @keyframes powerPulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(134,179,232,.3); }
-  50% { box-shadow: 0 0 20px rgba(134,179,232,.7); }
+  0%, 100% { box-shadow: 0 0 8px rgba(180,77,240,.3); }
+  50% { box-shadow: 0 0 20px rgba(180,77,240,.65); }
 }
 .hero-row.hero-friendly .hero-power:not(.used) { animation: powerPulse 2.2s ease-in-out infinite; }
 
@@ -1176,13 +1181,13 @@ button:focus-visible, .card:focus-visible, .minion:focus-visible {
 
 /* Кнопка хода: всё сыграно — зовёт завершить */
 .end-turn-btn.all-done {
-  background: linear-gradient(180deg, #8ef0a0, #2f9e4f);
-  border-color: #c2f5c8;
-  box-shadow: 0 0 26px rgba(126,231,135,.55), inset 0 2px 6px rgba(255,255,255,.35);
+  background: linear-gradient(180deg, #ffe9ad, #d09a2e);
+  border-color: #fff3c9;
+  box-shadow: 0 0 26px rgba(255,215,110,.6), inset 0 2px 6px rgba(255,255,255,.4);
   animation: allDonePulse 1.6s ease-in-out infinite;
 }
 @keyframes allDonePulse {
-  50% { box-shadow: 0 0 40px rgba(126,231,135,.85), inset 0 2px 6px rgba(255,255,255,.35); }
+  50% { box-shadow: 0 0 44px rgba(255,215,110,.95), inset 0 2px 6px rgba(255,255,255,.4); }
 }
 
 /* Усталость: колода на исходе */

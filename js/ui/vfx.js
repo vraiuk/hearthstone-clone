@@ -183,7 +183,7 @@ export class VFX {
         floatNumber(node, `+${ev.amount}`, 'fx-heal');
         flash(node, 'fx-healed');
         const { x, y } = centerOf(node);
-        burst(x, y, { count: 6, colors: ['#7ee787', '#c2f5c8'], size: 5, dist: 34, dur: 800 });
+        burst(x, y, { count: 6, colors: ['#ffd76e', '#fff3c9'], size: 5, dist: 34, dur: 800 });
         break;
       }
       case 'death': {
