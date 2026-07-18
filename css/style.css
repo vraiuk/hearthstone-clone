@@ -995,14 +995,13 @@ button:focus-visible, .card:focus-visible, .minion:focus-visible {
 .menu-hero::before {
   content: ''; position: fixed; inset: 0; z-index: -2;
   background: var(--menu-bg, url("../assets/art/board_bg.webp")) center / cover no-repeat;
-  opacity: .45;
+  opacity: .62;
 }
 .menu-hero::after {
   content: ''; position: fixed; inset: 0; z-index: -1;
   background:
-    radial-gradient(ellipse at 75% 40%, rgba(160,80,240,.12), transparent 55%),
-    radial-gradient(ellipse at 20% 80%, rgba(232,61,118,.1), transparent 50%),
-    linear-gradient(180deg, rgba(11,10,22,.5), rgba(11,10,22,.85));
+    radial-gradient(ellipse at 75% 40%, rgba(160,80,240,.08), transparent 55%),
+    linear-gradient(100deg, rgba(11,10,22,.82) 0%, rgba(11,10,22,.45) 45%, rgba(11,10,22,.15) 100%);
 }
 .menu-stars { position: absolute; inset: 0; pointer-events: none; }
 .menu-star {

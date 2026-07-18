@@ -17,7 +17,11 @@ export function renderMenu(root, nav) {
   Audio.setScene('menu');
   const s = Save.load();
   const wrap = el('div', 'menu-hero');
-  if (ART.has('menu_bg')) wrap.style.setProperty('--menu-bg', 'url("assets/art/menu_bg.webp")');
+  if (ART.has('menu_bg')) {
+    // Абсолютный URL: относительный в CSS-переменной резолвится от стайлшита.
+    const abs = new URL('assets/art/menu_bg.webp', location.href).href;
+    wrap.style.setProperty('--menu-bg', `url("${abs}")`);
+  }
 
   // Дрейфующие звёзды на фоне.
   const stars = el('div', 'menu-stars');
