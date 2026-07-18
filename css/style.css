@@ -27,7 +27,7 @@
   --border-accent: 2px solid #56508f;
 
   /* Типографика: display-serif для мира, sans для интерфейса */
-  --font-display: 'Cormorant', Georgia, serif;
+  --font-display: 'Alegreya', Georgia, serif;
   --font-body: 'Manrope', 'Segoe UI', sans-serif;
 
   /* Пропорции карты 5:7 (63×88 мм классической ККИ) */
@@ -936,3 +936,50 @@ button:focus-visible, .card:focus-visible, .minion:focus-visible {
 .end-overlay { backdrop-filter: blur(6px); }
 .end-panel { border: 1px solid rgba(255,215,110,.45); box-shadow: 0 24px 80px rgba(0,0,0,.8), 0 0 60px rgba(160,120,255,.15); }
 .end-sub { font-size: var(--fs-base); line-height: 1.5; }
+
+/* ---------- Камни статов: меч = атака, сердце = здоровье ---------- */
+/* Водяной знак-иконка под числом — считывается мгновенно. */
+.card-attack, .minion-attack, .hero-attack {
+  background-image:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23000" fill-opacity=".28" d="M19 3l2 2-8.5 8.5 1 1L15 16l-1.5 1.5-1.5-1.5-2.5 2.5L8 17l2.5-2.5L9 13l1.5-1.5 1 1L20 4z M5 15l4 4-2 2-1-1-1.5 1.5L3 20l1.5-1.5-1-1z"/></svg>'),
+    radial-gradient(circle at 35% 30%, #f2c14e, #9c6d1e);
+  background-size: 72% 72%, 100% 100%;
+  background-position: center 60%, center;
+  background-repeat: no-repeat;
+}
+.card-health, .minion-health, .hero-health {
+  background-image:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23fff" fill-opacity=".3" d="M12 21C7 16.6 3 13.2 3 9.3 3 6.4 5.2 4.5 7.7 4.5c1.6 0 3.2.8 4.3 2.2 1.1-1.4 2.7-2.2 4.3-2.2 2.5 0 4.7 1.9 4.7 4.8 0 3.9-4 7.3-9 11.7z"/></svg>'),
+    radial-gradient(circle at 35% 30%, #e2574c, #8f1f14);
+  background-size: 68% 68%, 100% 100%;
+  background-position: center 58%, center;
+  background-repeat: no-repeat;
+}
+.card-durability {
+  background-image:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23fff" fill-opacity=".28" d="M12 2.5l7.5 3.2V12c0 4.6-3.2 8-7.5 9.5C7.7 20 4.5 16.6 4.5 12V5.7Z"/></svg>'),
+    radial-gradient(circle at 35% 30%, #9aa7b3, #4d5a66);
+  background-size: 64% 64%, 100% 100%;
+  background-position: center 56%, center;
+  background-repeat: no-repeat;
+}
+.minion-health.damaged {
+  background-image:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23fff" fill-opacity=".3" d="M12 21C7 16.6 3 13.2 3 9.3 3 6.4 5.2 4.5 7.7 4.5c1.6 0 3.2.8 4.3 2.2 1.1-1.4 2.7-2.2 4.3-2.2 2.5 0 4.7 1.9 4.7 4.8 0 3.9-4 7.3-9 11.7z"/></svg>'),
+    radial-gradient(circle at 35% 30%, #ff3b2b, #6f0e05);
+  background-size: 68% 68%, 100% 100%;
+  background-position: center 58%, center;
+  background-repeat: no-repeat;
+}
+/* Числа поверх водяных знаков: жирнее и с плотной тенью */
+.card-attack, .card-health, .minion-attack, .minion-health, .hero-health, .hero-attack {
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0,0,0,.95), 0 0 4px rgba(0,0,0,.6);
+}
+
+/* Alegreya плотнее Cormorant — подстройка кеглей и весов */
+.game-title { font-weight: 800; letter-spacing: 1px; }
+.card-name { font-weight: 700; font-size: 12.5px; }
+.minion-name { font-weight: 700; }
+.tip-name { font-weight: 800; }
+.hero-name { font-weight: 700; }
