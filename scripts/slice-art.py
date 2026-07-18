@@ -103,8 +103,9 @@ REUSE = {
 
 GRID_COLS, GRID_ROWS = 3, 5
 OUT_SIZE = 400
-# Обрезка краёв клетки, чтобы срезать линии-разделители сетки.
-CELL_INSET = 0.045
+# Обрезка краёв клетки, чтобы срезать линии-разделители сетки и дрейф
+# нестрогих ИИ-сеток (клетки бывают смещены на пару процентов).
+CELL_INSET = 0.04
 
 
 def find_sheet(raw_dir, base):
@@ -113,6 +114,30 @@ def find_sheet(raw_dir, base):
         if os.path.exists(p):
             return p
     return None
+
+
+def detect_boundaries(img, n_cells, axis):
+    """Реальные границы клеток: ищем тёмные линии-разделители по профилю
+    яркости вблизи ожидаемых позиций (ИИ-сетки часто «плывут» на 2-5%)."""
+    gray = img.convert('L')
+    w, h = gray.size
+    size = h if axis == 'y' else w
+    px = gray.load()
+
+    def line_brightness(pos):
+        if axis == 'y':
+            return sum(px[x, pos] for x in range(0, w, 8))
+        return sum(px[pos, y] for y in range(0, h, 8))
+
+    bounds = [0]
+    for i in range(1, n_cells):
+        expected = size * i // n_cells
+        win = max(4, int(size * 0.05))
+        lo, hi = max(1, expected - win), min(size - 2, expected + win)
+        best = min(range(lo, hi), key=line_brightness)
+        bounds.append(best)
+    bounds.append(size)
+    return bounds
 
 
 def main():
@@ -127,15 +152,16 @@ def main():
             print(f'⏭  {base}: файл не найден в {raw_dir}, пропускаю')
             continue
         img = Image.open(path).convert('RGB')
-        w, h = img.size
-        cw, ch = w / GRID_COLS, h / GRID_ROWS
-        ix, iy = cw * CELL_INSET, ch * CELL_INSET
+        xs = detect_boundaries(img, GRID_COLS, 'x')
+        ys = detect_boundaries(img, GRID_ROWS, 'y')
         for i, cid in enumerate(ids):
             if not cid:
                 continue
             r, c = divmod(i, GRID_COLS)
-            box = (int(c * cw + ix), int(r * ch + iy),
-                   int((c + 1) * cw - ix), int((r + 1) * ch - iy))
+            cw, ch = xs[c + 1] - xs[c], ys[r + 1] - ys[r]
+            ix, iy = cw * CELL_INSET, ch * CELL_INSET
+            box = (int(xs[c] + ix), int(ys[r] + iy),
+                   int(xs[c + 1] - ix), int(ys[r + 1] - iy))
             tile = img.crop(box)
             # Квадратный кроп по центру + даунскейл.
             side = min(tile.size)

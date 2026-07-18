@@ -496,3 +496,7 @@ h1, h2 { font-weight: normal; }
   background-size: cover; background-position: center;
   border: 2px solid rgba(255,215,110,.5);
 }
+
+/* Фокус ИИ-арта чуть выше центра — субъект обычно в верхней половине кадра */
+.minion-art.has-image { background-position: center 32%; }
+.card-art.has-image { background-position: center 30%; }
