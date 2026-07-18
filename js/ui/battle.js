@@ -9,6 +9,7 @@ import { CLASSES } from '../data/decks.js';
 import { Audio } from '../audio/audio.js';
 import { VFX } from './vfx.js';
 import { ART } from '../data/art-manifest.js';
+import { DragController } from './drag.js';
 
 const AI_STEP_MS = 650;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -66,8 +67,94 @@ export class BattleScreen {
       }
     }
     this.logLines = [];
+    this.drag = new DragController(this);
+    this.lastBannerTurn = 0;
     Audio.setScene('battle');
     this.render();
+  }
+
+  // ---------- интерфейс для DragController ----------
+  canAct() {
+    return !this.busy && !this.game.over && !this.awaitHandoff &&
+      this.game.current === this.pid;
+  }
+  currentPower() { return HERO_POWERS[this.game.players[this.pid].heroClass]; }
+
+  playDragged(card, target) {
+    // Существо с целевым кличем, брошенное на стол: если цели есть —
+    // доигрываем выбором цели (стрелой или кликом).
+    if (!target && this.game.cardNeedsTarget(card)) {
+      const targets = this.game.validTargets(this.pid, card);
+      if (targets.length) {
+        this.selected = { kind: 'card', card, targets };
+        this.render();
+        return;
+      }
+    }
+    this.playCard(card, target);
+  }
+  attackDragged(attacker, target) {
+    const res = this.game.attack(this.pid, attacker, target);
+    if (!res.ok) this.toast(res.reason);
+    else Audio.sfx('attack');
+    this.selected = null;
+    this.render();
+  }
+  powerDragged(target) {
+    const res = this.game.useHeroPower(this.pid, target);
+    if (!res.ok) this.toast(res.reason);
+    else Audio.sfx('power');
+    this.selected = null;
+    this.render();
+  }
+  usePowerUntargeted() {
+    const res = this.game.useHeroPower(this.pid, null);
+    if (!res.ok) this.toast(res.reason);
+    else Audio.sfx('power');
+    this.render();
+  }
+
+  // Подсветки во время перетаскивания.
+  showDropZone() {
+    this.root.querySelector('.board-friendly')?.classList.add('drop-zone');
+  }
+  highlightTargets(targets) {
+    for (const t of targets) {
+      if (t.isHero) {
+        const side = t.playerId === this.pid ? 'friendly' : 'enemy';
+        this.root.querySelector(`.hero-portrait[data-hero="${side}"]`)?.classList.add('is-target');
+      } else {
+        this.root.querySelector(`.minion[data-instance-id="${t.instanceId}"]`)?.classList.add('is-target');
+      }
+    }
+  }
+  markDropHover(inZone) {
+    this.root.querySelector('.board-friendly')?.classList.toggle('drop-hover', !!inZone);
+  }
+  markTargetHover(entity) {
+    this.root.querySelectorAll('.target-hover').forEach((n) => n.classList.remove('target-hover'));
+    if (!entity) return;
+    const node = entity.isHero
+      ? this.root.querySelector(`.hero-portrait[data-hero="${entity.playerId === this.pid ? 'friendly' : 'enemy'}"]`)
+      : this.root.querySelector(`.minion[data-instance-id="${entity.instanceId}"]`);
+    node?.classList.add('target-hover');
+  }
+  clearDragHints() {
+    this.root.querySelectorAll('.drop-zone, .drop-hover, .target-hover')
+      .forEach((n) => n.classList.remove('drop-zone', 'drop-hover', 'target-hover'));
+    if (!this.selected) this.updateSelectability();
+  }
+
+  // Баннер смены хода.
+  showTurnBanner() {
+    if (this.game.over || this.turnBannerShownFor === this.game.turn) return;
+    this.turnBannerShownFor = this.game.turn;
+    const mine = this.game.current === this.pid;
+    if (this.mode === 'hotseat' && this.awaitHandoff) return;
+    const b = el('div', `turn-banner ${mine ? 'mine' : 'foe'}`,
+      mine ? '⚔ Ваш ход' : 'Ход противника');
+    document.body.append(b);
+    setTimeout(() => b.remove(), 1400);
   }
 
   // Perspective: in AI mode the human is always player 0; in hotseat the
@@ -111,6 +198,7 @@ export class BattleScreen {
     this.updateSelectability();
     // Проигрываем накопленные эффекты поверх свежего DOM.
     this.vfx.flush();
+    this.showTurnBanner();
 
     if (this.awaitHandoff) this.showHandoff();
     // Re-append the end screen on every render while the game is over —
@@ -177,6 +265,11 @@ export class BattleScreen {
 
     portrait.addEventListener('click', () => this.onHeroClick(side));
     powerBtn.addEventListener('click', (e) => { e.stopPropagation(); this.onPowerClick(side); });
+    if (side === 'friendly') {
+      if (p.hero.attack > 0 && p.hero.attacksThisTurn < 1) this.drag.armHero(portrait, p.hero);
+      if (!p.heroPowerUsed && p.mana >= (HERO_POWERS[p.heroClass].cost ?? 2))
+        this.drag.armPower(powerBtn);
+    }
     return row;
   }
 
@@ -185,6 +278,7 @@ export class BattleScreen {
     for (const m of p.board) {
       const node = buildMinionEl(m, this.game);
       node.addEventListener('click', () => this.onMinionClick(m, side));
+      if (side === 'friendly') this.drag.armMinion(node, m);
       row.append(node);
     }
     if (p.board.length === 0) row.append(el('div', 'board-empty', ''));
@@ -209,13 +303,21 @@ export class BattleScreen {
 
   handRow(p) {
     const row = el('div', 'hand-row');
-    for (const c of p.hand) {
+    const n = p.hand.length;
+    p.hand.forEach((c, i) => {
       const playable = !this.busy && this.game.current === this.pid &&
         this.game.canPlayCard(this.pid, c.instanceId, null).ok;
       const node = buildCardEl(c, { unplayable: !playable });
+      // Веер: поворот и подъём от центра руки.
+      const mid = (n - 1) / 2;
+      const off = n > 1 ? (i - mid) / mid : 0; // −1..1
+      node.style.setProperty('--fan-rot', (off * 7).toFixed(2) + 'deg');
+      node.style.setProperty('--fan-y', (Math.abs(off) * 14).toFixed(1) + 'px');
+      node.classList.add('in-hand');
       node.addEventListener('click', () => this.onHandCardClick(c));
+      if (playable) this.drag.armCard(node, c);
       row.append(node);
-    }
+    });
     return row;
   }
 
@@ -480,6 +582,7 @@ export class BattleScreen {
     }
     const btn = el('button', 'btn primary', 'Продолжить');
     btn.addEventListener('click', () => {
+      this.drag.destroy(); // снимаем window-слушатели этого боя
       const result = this.mode === 'hotseat' ? this.game.winner : this.game.winner === 0;
       this.opts.onFinish(result);
     });

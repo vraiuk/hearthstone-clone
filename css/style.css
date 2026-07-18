@@ -500,3 +500,97 @@ h1, h2 { font-weight: normal; }
 /* Фокус ИИ-арта чуть выше центра — субъект обычно в верхней половине кадра */
 .minion-art.has-image { background-position: center 32%; }
 .card-art.has-image { background-position: center 30%; }
+
+/* ---------- Драг-дроп и прицельная стрела ---------- */
+.target-arrow {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  z-index: 350; pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(255,32,80,.6));
+}
+.arrow-path { animation: arrowDash .5s linear infinite; }
+@keyframes arrowDash { to { stroke-dashoffset: -24; } }
+
+.drag-ghost {
+  position: fixed; z-index: 340; pointer-events: none;
+  transform: translate(-50%, -55%) rotate(3deg) scale(1.06);
+  opacity: .92;
+  box-shadow: 0 24px 48px rgba(0,0,0,.7), 0 0 24px rgba(143,199,255,.4) !important;
+  transition: none !important;
+}
+.drag-source { opacity: .25; }
+
+.board-friendly.drop-zone {
+  border-color: rgba(126,231,135,.5);
+  box-shadow: inset 0 0 30px rgba(126,231,135,.12);
+}
+.board-friendly.drop-hover {
+  border-color: #7ee787;
+  box-shadow: inset 0 0 46px rgba(126,231,135,.28);
+}
+.target-hover { transform: scale(1.1) !important; filter: brightness(1.35); }
+
+/* ---------- Веер руки ---------- */
+.hand-row { perspective: 900px; }
+.hand-row .card.in-hand {
+  transform: rotate(var(--fan-rot, 0)) translateY(var(--fan-y, 0));
+  margin: 0 -9px; /* карты слегка перекрываются, как в руке */
+  transform-origin: 50% 120%;
+  touch-action: none;
+}
+.hand-row .card.in-hand:hover {
+  transform: rotate(0) translateY(-26px) scale(1.55);
+  margin: 0 26px;
+  z-index: 45;
+}
+
+/* ---------- Баннер смены хода ---------- */
+.turn-banner {
+  position: fixed; left: 50%; top: 42%; z-index: 320;
+  transform: translate(-50%, -50%);
+  font-size: 42px; font-weight: bold; letter-spacing: 3px;
+  padding: 18px 64px; border-radius: 14px; pointer-events: none;
+  animation: bannerSweep 1.4s ease forwards;
+  white-space: nowrap;
+}
+.turn-banner.mine {
+  color: #241a05;
+  background: linear-gradient(180deg, #ffd76e, #c8952f);
+  box-shadow: 0 0 60px rgba(255,215,110,.5);
+  border: 2px solid #ffe9ad;
+}
+.turn-banner.foe {
+  color: var(--text);
+  background: linear-gradient(180deg, #3b3566, #232043);
+  box-shadow: 0 0 40px rgba(86,80,143,.6);
+  border: 2px solid #56508f;
+}
+@keyframes bannerSweep {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.6); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+  30% { transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.04); }
+}
+
+/* ---------- Кнопка завершения хода: круглая, справа ---------- */
+.center-bar { position: relative; }
+.end-turn-btn {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 92px; height: 92px; border-radius: 50%;
+  font-size: 14px; line-height: 1.15; padding: 8px;
+  border-width: 3px;
+  box-shadow: 0 0 22px rgba(255,215,110,.35), inset 0 2px 6px rgba(255,255,255,.3);
+  z-index: 20;
+}
+.end-turn-btn:hover:not(:disabled) { transform: translateY(-50%) scale(1.07); box-shadow: 0 0 34px rgba(255,215,110,.6); }
+.end-turn-btn:disabled { box-shadow: none; }
+.action-hint { margin-right: 110px; }
+
+/* Существа на столе: перетаскиваемые */
+.board-friendly .minion { touch-action: none; }
+.hero-portrait { touch-action: none; }
+
+@media (max-width: 900px) {
+  .end-turn-btn { width: 72px; height: 72px; font-size: 12px; }
+  .turn-banner { font-size: 26px; padding: 12px 34px; }
+}
