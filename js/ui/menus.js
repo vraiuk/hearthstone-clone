@@ -85,7 +85,15 @@ export function renderCampaign(root, nav) {
   CAMPAIGN.forEach((enc, i) => {
     const state = i < s.campaignProgress ? 'done' : i === s.campaignProgress ? 'current' : 'locked';
     const node = el('div', `enc-node enc-${state}`);
-    node.append(el('div', 'enc-icon', state === 'locked' ? '🔒' : enc.icon));
+    const iconEl = el('div', 'enc-icon');
+    const bossArt = 'boss_' + enc.id;
+    if (state !== 'locked' && ART.has(bossArt)) {
+      iconEl.classList.add('has-image');
+      iconEl.style.backgroundImage = `url("assets/art/${bossArt}.webp")`;
+    } else {
+      iconEl.textContent = state === 'locked' ? '🔒' : enc.icon;
+    }
+    node.append(iconEl);
     const info = el('div', 'enc-info');
     info.append(el('div', 'enc-name', `${i + 1}. ${enc.name}`));
     info.append(el('div', 'enc-class', `${CLASSES[enc.class].icon} ${CLASSES[enc.class].name} · ${diffLabel(enc.difficulty)}${enc.boss ? ' · 👑 БОСС' : ''}`));

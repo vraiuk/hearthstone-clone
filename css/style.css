@@ -673,3 +673,17 @@ button:focus-visible, .card:focus-visible, .minion:focus-visible {
   background: url("../assets/art/board_bg.webp") center / cover no-repeat;
   opacity: .5;
 }
+
+/* Рубашка карты как иконка колоды и портреты боссов на карте кампании */
+.deck-back-thumb {
+  display: inline-block; width: 22px; height: 30px; border-radius: 4px;
+  background-size: cover; background-position: center;
+  border: 1px solid rgba(255,215,110,.4); vertical-align: middle;
+  margin-right: 6px;
+}
+.enc-icon.has-image {
+  width: 64px; height: 64px; border-radius: 50%;
+  background-size: cover; background-position: center top;
+  border: 2px solid rgba(255,215,110,.45);
+  box-shadow: 0 0 12px rgba(160,120,255,.3);
+}

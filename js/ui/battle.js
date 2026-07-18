@@ -293,7 +293,15 @@ export class BattleScreen {
     }
     mana.append(crystals);
 
-    const deckInfo = el('div', 'deck-info', `🂠 ${p.deck.length}`);
+    const deckInfo = el('div', 'deck-info');
+    if (ART.has('card_back')) {
+      const back = el('span', 'deck-back-thumb');
+      back.style.backgroundImage = 'url("assets/art/card_back.webp")';
+      deckInfo.append(back);
+    } else {
+      deckInfo.append(document.createTextNode('🂠 '));
+    }
+    deckInfo.append(el('span', 'deck-count', String(p.deck.length)));
     if (side === 'enemy') deckInfo.append(el('span', 'hand-count', ` ✋ ${p.hand.length}`));
     const glory = el('div', 'glory-info', `⭐ ${p.glory}`);
     glory.title = 'Слава: копится за убийства существ врага, открывает Титульные карты';
